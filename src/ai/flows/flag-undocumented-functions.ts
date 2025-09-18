@@ -45,9 +45,9 @@ Your task is to identify and list any public functions in the provided Python co
 
 Analyze the following Python code:
 
-'''python
+\`\`\`python
 {{{pythonCode}}}
-'''
+\`\`\`
 
 Identify any public functions (i.e., not private functions starting with an underscore) that do not have docstrings.
 A docstring is the string literal that occurs as the first statement in a function definition.

@@ -4,9 +4,12 @@ import { useState } from 'react';
 import {
   AlertTriangle,
   BookOpenText,
+  Code,
   FileText,
+  Github,
   Lightbulb,
   LoaderCircle,
+  Upload,
   Wand2,
 } from 'lucide-react';
 import { analyzeCode, type AnalysisResults } from '@/app/actions';
@@ -33,6 +36,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion';
+import { Input } from './ui/input';
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -110,18 +114,48 @@ export default function MainPanel() {
         <div className="mx-auto max-w-4xl space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Python Code Input</CardTitle>
+              <CardTitle>Code Input</CardTitle>
               <CardDescription>
-                Provide the Python code you want to analyze.
+                Choose one of the methods below to provide your Python code.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Textarea
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                placeholder="Paste your Python code here..."
-                className="min-h-[300px] font-code text-sm"
-              />
+              <Tabs defaultValue="paste">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
+                  <TabsTrigger value="upload"><Upload />Upload Files</TabsTrigger>
+                  <TabsTrigger value="github"><Github />GitHub</TabsTrigger>
+                </TabsList>
+                <TabsContent value="paste" className="mt-4">
+                  <Textarea
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="Paste your Python code here..."
+                    className="min-h-[300px] font-code text-sm"
+                  />
+                </TabsContent>
+                <TabsContent value="upload" className="mt-4">
+                  <div className="flex items-center justify-center w-full">
+                      <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                              <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                              <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                              <p className="text-xs text-muted-foreground">Python files (.py)</p>
+                          </div>
+                          <Input id="dropzone-file" type="file" className="hidden" multiple accept=".py" />
+                      </label>
+                  </div> 
+                </TabsContent>
+                <TabsContent value="github" className="mt-4">
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">Enter a GitHub repository URL to analyze its content.</p>
+                    <div className="flex gap-2">
+                      <Input placeholder="https://github.com/user/repo" />
+                      <Button>Connect</Button>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
