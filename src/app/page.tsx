@@ -1,3 +1,10 @@
+import AppLayout from "@/components/app-layout";
+import MainPanel from "@/components/main-panel";
+
 export default function Home() {
-  return <></>;
+  return (
+    <AppLayout>
+      <MainPanel />
+    </AppLayout>
+  );
 }
