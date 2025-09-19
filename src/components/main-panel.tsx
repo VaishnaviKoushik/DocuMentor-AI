@@ -127,7 +127,7 @@ export default function MainPanel() {
             Generate documentation and receive improvement suggestions for your Python code.
           </p>
         </div>
-        <Button onClick={handleAnalysis} disabled={isLoading} size="lg">
+        <Button onClick={handleAnalysis} disabled={isLoading || !code.trim()} size="lg">
           {isLoading ? (
             <LoaderCircle className="animate-spin" />
           ) : (
@@ -149,8 +149,8 @@ export default function MainPanel() {
               <Tabs defaultValue="paste" className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
-                  <TabsTrigger value="upload"><Upload />Upload Files</TabsTrigger>
-                  <TabsTrigger value="github"><Github />GitHub</TabsTrigger>
+                  <TabsTrigger value="upload" disabled><Upload />Upload Files</TabsTrigger>
+                  <TabsTrigger value="github" disabled><Github />GitHub</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="mt-4 flex-1">
                   <Textarea
