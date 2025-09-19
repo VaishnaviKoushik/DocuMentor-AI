@@ -17,8 +17,8 @@ export default function AppSidebarContent() {
     <SidebarContent>
       <SidebarHeader>
         <div className="flex items-center gap-2">
-          <BrainCircuit className="text-sidebar-primary" size={28} />
-          <h2 className="font-headline text-xl font-bold text-sidebar-foreground">
+          <BrainCircuit className="text-sidebar-primary" size={24} />
+          <h2 className="font-headline text-lg font-semibold text-sidebar-foreground">
             DocuMentor AI
           </h2>
         </div>

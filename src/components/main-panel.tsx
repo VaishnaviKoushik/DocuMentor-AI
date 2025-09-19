@@ -108,8 +108,8 @@ export default function MainPanel() {
   };
 
   const renderSkeletons = () => (
-    <div className="space-y-4">
-      <Skeleton className="h-10 w-1/3" />
+    <div className="space-y-4 p-1">
+      <Skeleton className="h-8 w-1/3" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />
@@ -119,8 +119,8 @@ export default function MainPanel() {
   );
 
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4">
+    <div className="flex h-full min-h-screen flex-col">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4 sm:px-6">
         <div>
           <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
           <p className="text-muted-foreground">
@@ -136,7 +136,7 @@ export default function MainPanel() {
           <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
         </Button>
       </header>
-      <main className="flex-1 overflow-hidden p-4">
+      <main className="flex-1 overflow-hidden p-4 sm:px-6">
         <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
             <CardHeader>
@@ -157,12 +157,12 @@ export default function MainPanel() {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Paste your Python code here..."
-                    className="h-full min-h-[300px] resize-none font-code text-sm"
+                    className="h-full min-h-[400px] resize-none font-code text-sm"
                   />
                 </TabsContent>
                 <TabsContent value="upload" className="mt-4">
                   <div className="flex items-center justify-center w-full">
-                      <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50">
+                      <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted/50">
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
                               <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
@@ -205,10 +205,10 @@ export default function MainPanel() {
                     <div className="mt-4">
                       <TabsContent value="docstrings">
                         {isLoading ? renderSkeletons() : (
-                          <Card className="bg-muted/30">
+                          <Card className="bg-card">
                             <CardHeader>
                               <div className="flex justify-between items-center">
-                                <CardTitle className="text-xl">Generated reST Docstrings</CardTitle>
+                                <CardTitle className="text-lg">Generated reST Docstrings</CardTitle>
                                 <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
                                   {isCopied ? <Check /> : <Clipboard />}
                                   {isCopied ? 'Copied!' : 'Copy'}
@@ -219,7 +219,7 @@ export default function MainPanel() {
                               <Textarea
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
-                                className="min-h-[300px] font-code text-sm"
+                                className="min-h-[400px] font-code text-sm"
                               />
                             </CardContent>
                           </Card>
@@ -227,9 +227,9 @@ export default function MainPanel() {
                       </TabsContent>
                       <TabsContent value="improvements">
                         {isLoading ? renderSkeletons() : (
-                           <Card className="bg-muted/30">
+                           <Card className="bg-card">
                             <CardHeader>
-                              <CardTitle className="text-xl">Improvement Suggestions</CardTitle>
+                              <CardTitle className="text-lg">Improvement Suggestions</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               {results?.improvements && results.improvements.length > 0 ? (
@@ -250,16 +250,16 @@ export default function MainPanel() {
                       </TabsContent>
                       <TabsContent value="undocumented">
                          {isLoading ? renderSkeletons() : (
-                           <Card className="bg-muted/30">
+                           <Card className="bg-card">
                             <CardHeader>
-                              <CardTitle className="text-xl">Undocumented Public Functions</CardTitle>
+                              <CardTitle className="text-lg">Undocumented Public Functions</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               {results?.undocumented && results.undocumented.length > 0 ? (
-                                <ul className="list-inside list-disc space-y-2">
+                                <ul className="space-y-3">
                                   {results.undocumented.map((func, index) => (
                                     <li key={index} className="flex items-center gap-2">
-                                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                                      <AlertTriangle className="h-5 w-5 text-destructive" />
                                       <span className="font-code">{func}</span>
                                     </li>
                                   ))}
@@ -273,9 +273,9 @@ export default function MainPanel() {
                       </TabsContent>
                       <TabsContent value="summary">
                          {isLoading ? renderSkeletons() : (
-                           <Card className="bg-muted/30">
+                           <Card className="bg-card">
                             <CardHeader>
-                              <CardTitle className="text-xl">Codebase Summary</CardTitle>
+                              <CardTitle className="text-lg">Codebase Summary</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               <div className="prose prose-sm dark:prose-invert max-w-none">
