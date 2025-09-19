@@ -1,7 +1,7 @@
 // src/app/actions.ts
 'use server';
 
-import { generateRestDocstrings } from '@/ai/flows/generate-rest-docstrings';
+import { generateDocstrings } from '@/ai/flows/generate-docstrings';
 import { suggestImprovementsAndMissingDocstrings } from '@/ai/flows/suggest-improvements-docstrings';
 import { flagUndocumentedFunctions } from '@/ai/flows/flag-undocumented-functions';
 import { generateCodebaseSummary } from '@/ai/flows/generate-codebase-summary';
@@ -14,10 +14,11 @@ export type AnalysisResults = {
 };
 
 export async function analyzeCode(
-  pythonCode: string
+  code: string,
+  language: string,
 ): Promise<AnalysisResults | { error: string }> {
   try {
-    if (!pythonCode.trim()) {
+    if (!code.trim()) {
       return {
         docstrings: '',
         improvements: [],
@@ -28,14 +29,14 @@ export async function analyzeCode(
 
     const [docstringsResult, improvementsResult, undocumentedResult, summaryResult] =
       await Promise.all([
-        generateRestDocstrings({ pythonCode }),
-        suggestImprovementsAndMissingDocstrings({ pythonCode }),
-        flagUndocumentedFunctions({ pythonCode }),
-        generateCodebaseSummary({ codebaseDescription: pythonCode }),
+        generateDocstrings({ code, language }),
+        suggestImprovementsAndMissingDocstrings({ code, language }),
+        flagUndocumentedFunctions({ code, language }),
+        generateCodebaseSummary({ codebaseDescription: code }),
       ]);
 
     return {
-      docstrings: docstringsResult.restDocstrings,
+      docstrings: docstringsResult.docstrings,
       improvements: improvementsResult.suggestions,
       undocumented: undocumentedResult.undocumentedFunctions,
       summary: summaryResult.readmeContent,

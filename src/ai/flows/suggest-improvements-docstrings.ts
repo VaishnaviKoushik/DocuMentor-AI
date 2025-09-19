@@ -2,9 +2,9 @@
 'use server';
 
 /**
- * @fileOverview This flow analyzes Python code and suggests improvements to existing docstrings and identifies missing docstrings.
+ * @fileOverview This flow analyzes code and suggests improvements to existing docstrings and identifies missing docstrings.
  *
- * - suggestImprovementsAndMissingDocstrings - A function that takes Python code as input and returns suggestions for docstring improvements and identifies missing docstrings.
+ * - suggestImprovementsAndMissingDocstrings - A function that takes code as input and returns suggestions for docstring improvements and identifies missing docstrings.
  * - SuggestImprovementsAndMissingDocstringsInput - The input type for the suggestImprovementsAndMissingDocstrings function.
  * - SuggestImprovementsAndMissingDocstringsOutput - The return type for the suggestImprovementsAndMissingDocstrings function.
  */
@@ -13,7 +13,8 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const SuggestImprovementsAndMissingDocstringsInputSchema = z.object({
-  pythonCode: z.string().describe('The Python code to analyze.'),
+  code: z.string().describe('The code to analyze.'),
+  language: z.string().describe('The programming language of the code (e.g., "python", "javascript").'),
 });
 export type SuggestImprovementsAndMissingDocstringsInput = z.infer<typeof SuggestImprovementsAndMissingDocstringsInputSchema>;
 
@@ -30,12 +31,12 @@ const prompt = ai.definePrompt({
   name: 'suggestImprovementsAndMissingDocstringsPrompt',
   input: {schema: SuggestImprovementsAndMissingDocstringsInputSchema},
   output: {schema: SuggestImprovementsAndMissingDocstringsOutputSchema},
-  prompt: `You are an AI documentation assistant that analyzes Python code and suggests improvements to existing docstrings and identifies missing docstrings.
+  prompt: `You are an AI documentation assistant that analyzes code and suggests improvements to existing docstrings and identifies missing docstrings.
 
-  Analyze the following Python code and provide a list of suggestions for improving existing docstrings and identifying missing docstrings. Be specific and provide actionable advice.
+  Analyze the following {{language}} code and provide a list of suggestions for improving existing docstrings and identifying missing docstrings. Be specific and provide actionable advice.
 
-  Python code:
-  {{pythonCode}}`,
+  Code:
+  {{{code}}}`,
 });
 
 const suggestImprovementsAndMissingDocstringsFlow = ai.defineFlow(

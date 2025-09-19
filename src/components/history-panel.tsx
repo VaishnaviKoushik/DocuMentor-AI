@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { HistoryItem } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, History, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 type HistoryPanelProps = {
@@ -68,9 +68,10 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                         <p className="font-semibold">
                           Analysis from{' '}
                           {formatDistanceToNow(new Date(item.id), { addSuffix: true })}
+                           <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{item.language}</span>
                         </p>
                         <p className="text-sm text-muted-foreground truncate max-w-md">
-                          {item.code.split('\\n')[0]}
+                          {item.code.split('\n')[0]}
                         </p>
                       </div>
                       <div className="flex gap-2">

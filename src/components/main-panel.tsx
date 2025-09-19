@@ -47,6 +47,8 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { type HistoryItem } from '@/lib/types';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -85,6 +87,7 @@ type MainPanelProps = {
 
 export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const [code, setCode] = useState(exampleCode);
+  const [language, setLanguage] = useState('python');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<AnalysisResults | null>(null);
   const [editedDocstrings, setEditedDocstrings] = useState('');
@@ -95,6 +98,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     if (selectedHistoryItem) {
       setCode(selectedHistoryItem.code);
       setResults(selectedHistoryItem.results);
+      if (selectedHistoryItem.language) {
+        setLanguage(selectedHistoryItem.language);
+      }
     }
   }, [selectedHistoryItem]);
 
@@ -107,7 +113,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const handleAnalysis = async () => {
     setIsLoading(true);
     setResults(null);
-    const response = await analyzeCode(code);
+    const response = await analyzeCode(code, language);
     if ('error' in response) {
       toast({
         variant: 'destructive',
@@ -120,6 +126,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
       const historyItem: HistoryItem = {
         id: new Date().toISOString(),
         code,
+        language,
         results: response,
       };
       const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
@@ -177,7 +184,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         <div>
           <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
           <p className="text-muted-foreground">
-            Generate documentation and receive improvement suggestions for your Python code.
+            Generate documentation and receive improvement suggestions for your code.
           </p>
         </div>
         <Button onClick={handleAnalysis} disabled={isLoading || !code.trim()} size="lg">
@@ -193,10 +200,26 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
             <CardHeader>
-              <CardTitle>Code Input</CardTitle>
-              <CardDescription>
-                Paste your Python code, upload a file, or connect to a GitHub repo.
-              </CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle>Code Input</CardTitle>
+                  <CardDescription>
+                    Paste your code, upload a file, or connect to a GitHub repo.
+                  </CardDescription>
+                </div>
+                <div className="w-40">
+                  <Label htmlFor="language-select">Language</Label>
+                   <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger id="language-select">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="python">Python</SelectItem>
+                      <SelectItem value="javascript">JavaScript</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col pt-0">
               <Tabs defaultValue="paste" className="flex-1 flex flex-col">
@@ -209,7 +232,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   <Textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    placeholder="Paste your Python code here..."
+                    placeholder="Paste your code here..."
                     className="h-full min-h-[400px] resize-none font-code text-sm"
                   />
                 </TabsContent>
@@ -219,9 +242,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
                               <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                              <p className="text-xs text-muted-foreground">Python files (.py)</p>
+                              <p className="text-xs text-muted-foreground">.py, .js, .java, etc.</p>
                           </div>
-                          <Input id="dropzone-file" type="file" className="hidden" multiple accept=".py" />
+                          <Input id="dropzone-file" type="file" className="hidden" multiple />
                       </label>
                   </div> 
                 </TabsContent>
@@ -261,7 +284,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                           <Card className="bg-card">
                             <CardHeader>
                               <div className="flex justify-between items-center">
-                                <CardTitle className="text-lg">Generated reST Docstrings</CardTitle>
+                                <CardTitle className="text-lg">Generated Docstrings</CardTitle>
                                 <div className="flex items-center gap-2">
                                   <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
                                     {isCopied ? <Check /> : <Clipboard />}
@@ -320,7 +343,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                          {isLoading ? renderSkeletons() : (
                            <Card className="bg-card">
                             <CardHeader>
-                              <CardTitle className="text-lg">Undocumented Public Functions</CardTitle>
+                              <CardTitle className="text-lg">Undocumented Functions</CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               {results?.undocumented && results.undocumented.length > 0 ? (
