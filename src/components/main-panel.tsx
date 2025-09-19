@@ -145,7 +145,7 @@ export default function MainPanel() {
                 Paste your Python code, upload a file, or connect to a GitHub repo.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col">
+            <CardContent className="flex-1 flex flex-col pt-0">
               <Tabs defaultValue="paste" className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
@@ -194,7 +194,7 @@ export default function MainPanel() {
                     Explore the generated documentation and suggestions.
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0">
                   <Tabs defaultValue="docstrings" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                       <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
@@ -208,14 +208,14 @@ export default function MainPanel() {
                           <Card className="bg-muted/30">
                             <CardHeader>
                               <div className="flex justify-between items-center">
-                                <CardTitle>Generated reST Docstrings</CardTitle>
+                                <CardTitle className="text-xl">Generated reST Docstrings</CardTitle>
                                 <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
                                   {isCopied ? <Check /> : <Clipboard />}
                                   {isCopied ? 'Copied!' : 'Copy'}
                                 </Button>
                               </div>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-0">
                               <Textarea
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
@@ -229,9 +229,9 @@ export default function MainPanel() {
                         {isLoading ? renderSkeletons() : (
                            <Card className="bg-muted/30">
                             <CardHeader>
-                              <CardTitle>Improvement Suggestions</CardTitle>
+                              <CardTitle className="text-xl">Improvement Suggestions</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-0">
                               {results?.improvements && results.improvements.length > 0 ? (
                                  <Accordion type="single" collapsible className="w-full">
                                   {results.improvements.map((item, index) => (
@@ -252,9 +252,9 @@ export default function MainPanel() {
                          {isLoading ? renderSkeletons() : (
                            <Card className="bg-muted/30">
                             <CardHeader>
-                              <CardTitle>Undocumented Public Functions</CardTitle>
+                              <CardTitle className="text-xl">Undocumented Public Functions</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-0">
                               {results?.undocumented && results.undocumented.length > 0 ? (
                                 <ul className="list-inside list-disc space-y-2">
                                   {results.undocumented.map((func, index) => (
@@ -275,9 +275,9 @@ export default function MainPanel() {
                          {isLoading ? renderSkeletons() : (
                            <Card className="bg-muted/30">
                             <CardHeader>
-                              <CardTitle>Codebase Summary</CardTitle>
+                              <CardTitle className="text-xl">Codebase Summary</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="pt-0">
                               <div className="prose prose-sm dark:prose-invert max-w-none">
                                 {results?.summary.split('\n').map((line, i) => {
                                   if (line.startsWith('#')) {
