@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   BookOpenText,
+  Check,
+  Clipboard,
   Code,
   FileText,
   Github,
@@ -73,7 +75,15 @@ export default function MainPanel() {
   const [code, setCode] = useState(exampleCode);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<AnalysisResults | null>(null);
+  const [editedDocstrings, setEditedDocstrings] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (results) {
+      setEditedDocstrings(results.docstrings);
+    }
+  }, [results]);
 
   const handleAnalysis = async () => {
     setIsLoading(true);
@@ -89,6 +99,12 @@ export default function MainPanel() {
       setResults(response);
     }
     setIsLoading(false);
+  };
+
+  const handleCopyToClipboard = () => {
+    navigator.clipboard.writeText(editedDocstrings);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const renderSkeletons = () => (
@@ -191,12 +207,20 @@ export default function MainPanel() {
                       {isLoading ? renderSkeletons() : (
                         <Card className="bg-muted/30">
                           <CardHeader>
-                            <CardTitle>Generated reST Docstrings</CardTitle>
+                            <div className="flex justify-between items-center">
+                              <CardTitle>Generated reST Docstrings</CardTitle>
+                              <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
+                                {isCopied ? <Check /> : <Clipboard />}
+                                {isCopied ? 'Copied!' : 'Copy'}
+                              </Button>
+                            </div>
                           </CardHeader>
                           <CardContent>
-                            <pre className="whitespace-pre-wrap rounded-md bg-background p-4 font-code text-sm">
-                              <code>{results?.docstrings}</code>
-                            </pre>
+                            <Textarea
+                              value={editedDocstrings}
+                              onChange={(e) => setEditedDocstrings(e.target.value)}
+                              className="min-h-[300px] font-code text-sm"
+                            />
                           </CardContent>
                         </Card>
                       )}
