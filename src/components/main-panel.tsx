@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -208,7 +209,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   </CardDescription>
                 </div>
                 <div className="w-40">
-                  <Label htmlFor="language-select">Language</Label>
+                  <Label htmlFor="language-select" className="sr-only">Language</Label>
                    <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger id="language-select">
                       <SelectValue placeholder="Select language" />
