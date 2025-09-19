@@ -94,6 +94,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const [editedDocstrings, setEditedDocstrings] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('paste');
 
   useEffect(() => {
     if (selectedHistoryItem) {
@@ -168,6 +169,20 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     URL.revokeObjectURL(url);
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        setCode(text);
+        // Switch back to the paste tab to show the content
+        setActiveTab('paste');
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const renderSkeletons = () => (
     <div className="space-y-4 p-1">
       <Skeleton className="h-8 w-1/3" />
@@ -223,11 +238,11 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col pt-0">
-              <Tabs defaultValue="paste" className="flex-1 flex flex-col">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
-                  <TabsTrigger value="upload" disabled><Upload />Upload Files</TabsTrigger>
-                  <TabsTrigger value="github" disabled><Github />GitHub</TabsTrigger>
+                  <TabsTrigger value="upload"><Upload />Upload Files</TabsTrigger>
+                  <TabsTrigger value="github"><Github />GitHub</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="mt-4 flex-1">
                   <Textarea
@@ -245,7 +260,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                               <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                               <p className="text-xs text-muted-foreground">.py, .js, .java, etc.</p>
                           </div>
-                          <Input id="dropzone-file" type="file" className="hidden" multiple />
+                          <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} />
                       </label>
                   </div> 
                 </TabsContent>
@@ -254,7 +269,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     <p className="text-sm text-muted-foreground">Enter a GitHub repository URL to analyze its content.</p>
                     <div className="flex gap-2">
                       <Input placeholder="https://github.com/user/repo" />
-                      <Button>Connect</Button>
+                      <Button disabled>Connect</Button>
                     </div>
                   </div>
                 </TabsContent>
@@ -395,3 +410,5 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
+
+    
