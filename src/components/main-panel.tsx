@@ -40,7 +40,13 @@ import {
   AccordionTrigger,
 } from './ui/accordion';
 import { Input } from './ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
+import { type HistoryItem } from '@/lib/types';
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -73,13 +79,24 @@ class Greeter:
         print(f"Hello, {self.name}!")
 `;
 
-export default function MainPanel() {
+type MainPanelProps = {
+  selectedHistoryItem: HistoryItem | null;
+};
+
+export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const [code, setCode] = useState(exampleCode);
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<AnalysisResults | null>(null);
   const [editedDocstrings, setEditedDocstrings] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (selectedHistoryItem) {
+      setCode(selectedHistoryItem.code);
+      setResults(selectedHistoryItem.results);
+    }
+  }, [selectedHistoryItem]);
 
   useEffect(() => {
     if (results) {
@@ -99,6 +116,17 @@ export default function MainPanel() {
       });
     } else {
       setResults(response);
+      // Save to history
+      const historyItem: HistoryItem = {
+        id: new Date().toISOString(),
+        code,
+        results: response,
+      };
+      const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
+      localStorage.setItem(
+        'analysisHistory',
+        JSON.stringify([historyItem, ...history])
+      );
     }
     setIsLoading(false);
   };

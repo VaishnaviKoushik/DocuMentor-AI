@@ -1,3 +1,4 @@
+// src/components/sidebar-content.tsx
 'use client';
 
 import {
@@ -9,10 +10,19 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { BrainCircuit, Github, Home, Settings } from 'lucide-react';
+import { BrainCircuit, Github, Home, History, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { type View } from '@/app/page';
 
-export default function AppSidebarContent() {
+type AppSidebarContentProps = {
+  view: View;
+  setView: (view: View) => void;
+};
+
+export default function AppSidebarContent({
+  view,
+  setView,
+}: AppSidebarContentProps) {
   return (
     <SidebarContent>
       <SidebarHeader>
@@ -25,9 +35,21 @@ export default function AppSidebarContent() {
       </SidebarHeader>
       <SidebarMenu className="flex-1">
         <SidebarMenuItem>
-          <SidebarMenuButton href="#" isActive>
+          <SidebarMenuButton
+            onClick={() => setView('main')}
+            isActive={view === 'main'}
+          >
             <Home />
             Home
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            onClick={() => setView('history')}
+            isActive={view === 'history'}
+          >
+            <History />
+            History
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -43,8 +65,8 @@ export default function AppSidebarContent() {
           <p>&copy; {new Date().getFullYear()} DocuMentor AI</p>
           <Link href="#" className="hover:text-sidebar-foreground">
             <div className="flex items-center gap-2 mt-2">
-                <Github size={16}/>
-                <span>View on GitHub</span>
+              <Github size={16} />
+              <span>View on GitHub</span>
             </div>
           </Link>
         </div>
