@@ -120,34 +120,44 @@ export default function MainPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex-shrink-0 border-b p-4">
-        <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
-        <p className="text-muted-foreground">
-          Paste your Python code below to generate documentation and receive improvement suggestions.
-        </p>
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4">
+        <div>
+          <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
+          <p className="text-muted-foreground">
+            Generate documentation and receive improvement suggestions for your Python code.
+          </p>
+        </div>
+        <Button onClick={handleAnalysis} disabled={isLoading} size="lg">
+          {isLoading ? (
+            <LoaderCircle className="animate-spin" />
+          ) : (
+            <Wand2 />
+          )}
+          <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
+        </Button>
       </header>
-      <main className="flex-1 overflow-auto p-4">
-        <div className="mx-auto max-w-4xl space-y-6">
-          <Card>
+      <main className="flex-1 overflow-hidden p-4">
+        <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
+          <Card className="flex flex-col">
             <CardHeader>
               <CardTitle>Code Input</CardTitle>
               <CardDescription>
-                Choose one of the methods below to provide your Python code.
+                Paste your Python code, upload a file, or connect to a GitHub repo.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="paste">
+            <CardContent className="flex-1 flex flex-col">
+              <Tabs defaultValue="paste" className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
                   <TabsTrigger value="upload"><Upload />Upload Files</TabsTrigger>
                   <TabsTrigger value="github"><Github />GitHub</TabsTrigger>
                 </TabsList>
-                <TabsContent value="paste" className="mt-4">
+                <TabsContent value="paste" className="mt-4 flex-1">
                   <Textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Paste your Python code here..."
-                    className="min-h-[300px] font-code text-sm"
+                    className="h-full min-h-[300px] resize-none font-code text-sm"
                   />
                 </TabsContent>
                 <TabsContent value="upload" className="mt-4">
@@ -175,128 +185,119 @@ export default function MainPanel() {
             </CardContent>
           </Card>
 
-          <div className="flex justify-center">
-            <Button onClick={handleAnalysis} disabled={isLoading} size="lg">
-              {isLoading ? (
-                <LoaderCircle className="animate-spin" />
-              ) : (
-                <Wand2 />
-              )}
-              <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
-            </Button>
+          <div className="overflow-auto">
+            {(isLoading || results) && (
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle>Analysis Results</CardTitle>
+                  <CardDescription>
+                    Explore the generated documentation and suggestions.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="docstrings" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                      <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
+                      <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
+                      <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
+                      <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
+                    </TabsList>
+                    <div className="mt-4">
+                      <TabsContent value="docstrings">
+                        {isLoading ? renderSkeletons() : (
+                          <Card className="bg-muted/30">
+                            <CardHeader>
+                              <div className="flex justify-between items-center">
+                                <CardTitle>Generated reST Docstrings</CardTitle>
+                                <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
+                                  {isCopied ? <Check /> : <Clipboard />}
+                                  {isCopied ? 'Copied!' : 'Copy'}
+                                </Button>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <Textarea
+                                value={editedDocstrings}
+                                onChange={(e) => setEditedDocstrings(e.target.value)}
+                                className="min-h-[300px] font-code text-sm"
+                              />
+                            </CardContent>
+                          </Card>
+                        )}
+                      </TabsContent>
+                      <TabsContent value="improvements">
+                        {isLoading ? renderSkeletons() : (
+                           <Card className="bg-muted/30">
+                            <CardHeader>
+                              <CardTitle>Improvement Suggestions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {results?.improvements && results.improvements.length > 0 ? (
+                                 <Accordion type="single" collapsible className="w-full">
+                                  {results.improvements.map((item, index) => (
+                                    <AccordionItem value={`item-${index}`} key={index}>
+                                      <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
+                                      <AccordionContent>{item}</AccordionContent>
+                                    </AccordionItem>
+                                  ))}
+                                </Accordion>
+                              ) : (
+                                <p className="text-muted-foreground">No improvement suggestions found.</p>
+                              )}
+                            </CardContent>
+                          </Card>
+                        )}
+                      </TabsContent>
+                      <TabsContent value="undocumented">
+                         {isLoading ? renderSkeletons() : (
+                           <Card className="bg-muted/30">
+                            <CardHeader>
+                              <CardTitle>Undocumented Public Functions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              {results?.undocumented && results.undocumented.length > 0 ? (
+                                <ul className="list-inside list-disc space-y-2">
+                                  {results.undocumented.map((func, index) => (
+                                    <li key={index} className="flex items-center gap-2">
+                                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                                      <span className="font-code">{func}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
+                              )}
+                            </CardContent>
+                          </Card>
+                         )}
+                      </TabsContent>
+                      <TabsContent value="summary">
+                         {isLoading ? renderSkeletons() : (
+                           <Card className="bg-muted/30">
+                            <CardHeader>
+                              <CardTitle>Codebase Summary</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="prose prose-sm dark:prose-invert max-w-none">
+                                {results?.summary.split('\n').map((line, i) => {
+                                  if (line.startsWith('#')) {
+                                    const level = line.match(/^#+/)?.[0].length || 1;
+                                    const Tag = `h${level + 1}` as keyof JSX.IntrinsicElements;
+                                    return <Tag key={i} className="font-headline">{line.replace(/^#+\s*/, '')}</Tag>;
+                                  }
+                                  return <p key={i}>{line}</p>;
+                                })}
+                              </div>
+                            </CardContent>
+                          </Card>
+                         )}
+                      </TabsContent>
+                    </div>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            )}
           </div>
-
-          {(isLoading || results) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Analysis Results</CardTitle>
-                <CardDescription>
-                  Explore the generated documentation and suggestions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="docstrings" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-                    <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
-                    <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
-                    <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
-                    <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
-                  </TabsList>
-                  <div className="mt-4">
-                    <TabsContent value="docstrings">
-                      {isLoading ? renderSkeletons() : (
-                        <Card className="bg-muted/30">
-                          <CardHeader>
-                            <div className="flex justify-between items-center">
-                              <CardTitle>Generated reST Docstrings</CardTitle>
-                              <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
-                                {isCopied ? <Check /> : <Clipboard />}
-                                {isCopied ? 'Copied!' : 'Copy'}
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <Textarea
-                              value={editedDocstrings}
-                              onChange={(e) => setEditedDocstrings(e.target.value)}
-                              className="min-h-[300px] font-code text-sm"
-                            />
-                          </CardContent>
-                        </Card>
-                      )}
-                    </TabsContent>
-                    <TabsContent value="improvements">
-                      {isLoading ? renderSkeletons() : (
-                         <Card className="bg-muted/30">
-                          <CardHeader>
-                            <CardTitle>Improvement Suggestions</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {results?.improvements && results.improvements.length > 0 ? (
-                               <Accordion type="single" collapsible className="w-full">
-                                {results.improvements.map((item, index) => (
-                                  <AccordionItem value={`item-${index}`} key={index}>
-                                    <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
-                                    <AccordionContent>{item}</AccordionContent>
-                                  </AccordionItem>
-                                ))}
-                              </Accordion>
-                            ) : (
-                              <p className="text-muted-foreground">No improvement suggestions found.</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                      )}
-                    </TabsContent>
-                    <TabsContent value="undocumented">
-                       {isLoading ? renderSkeletons() : (
-                         <Card className="bg-muted/30">
-                          <CardHeader>
-                            <CardTitle>Undocumented Public Functions</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            {results?.undocumented && results.undocumented.length > 0 ? (
-                              <ul className="list-inside list-disc space-y-2">
-                                {results.undocumented.map((func, index) => (
-                                  <li key={index} className="flex items-center gap-2">
-                                    <AlertTriangle className="h-4 w-4 text-destructive" />
-                                    <span className="font-code">{func}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
-                            )}
-                          </CardContent>
-                        </Card>
-                       )}
-                    </TabsContent>
-                    <TabsContent value="summary">
-                       {isLoading ? renderSkeletons() : (
-                         <Card className="bg-muted/30">
-                          <CardHeader>
-                            <CardTitle>Codebase Summary</CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
-                              {results?.summary.split('\n').map((line, i) => {
-                                if (line.startsWith('#')) {
-                                  const level = line.match(/^#+/)?.[0].length || 1;
-                                  const Tag = `h${level + 1}` as keyof JSX.IntrinsicElements;
-                                  return <Tag key={i} className="font-headline">{line.replace(/^#+\s*/, '')}</Tag>;
-                                }
-                                return <p key={i}>{line}</p>;
-                              })}
-                            </div>
-                          </CardContent>
-                        </Card>
-                       )}
-                    </TabsContent>
-                  </div>
-                </Tabs>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
     </div>
