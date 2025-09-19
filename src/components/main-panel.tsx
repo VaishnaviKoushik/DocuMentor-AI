@@ -7,6 +7,7 @@ import {
   Check,
   Clipboard,
   Code,
+  Download,
   FileText,
   Github,
   Lightbulb,
@@ -39,6 +40,7 @@ import {
   AccordionTrigger,
 } from './ui/accordion';
 import { Input } from './ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -105,6 +107,29 @@ export default function MainPanel() {
     navigator.clipboard.writeText(editedDocstrings);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handleDownload = (format: 'md' | 'html' | 'txt') => {
+    let content = editedDocstrings;
+    let mimeType = 'text/plain';
+    let filename = `docstrings.${format}`;
+
+    if (format === 'html') {
+      content = `<html><head><title>Docstrings</title></head><body><pre>${editedDocstrings}</pre></body></html>`;
+      mimeType = 'text/html';
+    } else if (format === 'md') {
+      mimeType = 'text/markdown';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const renderSkeletons = () => (
@@ -209,10 +234,25 @@ export default function MainPanel() {
                             <CardHeader>
                               <div className="flex justify-between items-center">
                                 <CardTitle className="text-lg">Generated reST Docstrings</CardTitle>
-                                <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
-                                  {isCopied ? <Check /> : <Clipboard />}
-                                  {isCopied ? 'Copied!' : 'Copy'}
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                  <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
+                                    {isCopied ? <Check /> : <Clipboard />}
+                                    {isCopied ? 'Copied!' : 'Copy'}
+                                  </Button>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm">
+                                        <Download />
+                                        Download
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                      <DropdownMenuItem onSelect={() => handleDownload('md')}>Markdown (.md)</DropdownMenuItem>
+                                      <DropdownMenuItem onSelect={() => handleDownload('html')}>HTML (.html)</DropdownMenuItem>
+                                      <DropdownMenuItem onSelect={() => handleDownload('txt')}>Text (.txt)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
                               </div>
                             </CardHeader>
                             <CardContent className="pt-0">
