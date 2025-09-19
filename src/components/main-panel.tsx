@@ -15,7 +15,9 @@ import {
   LoaderCircle,
   Upload,
   Wand2,
+  Info
 } from 'lucide-react';
+import Link from 'next/link';
 import { analyzeCode, type AnalysisResults } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -50,6 +52,7 @@ import {
 import { type HistoryItem } from '@/lib/types';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -266,11 +269,32 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                 </TabsContent>
                 <TabsContent value="github" className="mt-4">
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">Enter a GitHub repository URL to analyze its content.</p>
-                    <div className="flex gap-2">
-                      <Input placeholder="https://github.com/user/repo" />
-                      <Button disabled>Connect</Button>
+                    <Alert>
+                      <Info className="h-4 w-4" />
+                      <AlertTitle>Feature Coming Soon</AlertTitle>
+                      <AlertDescription>
+                        GitHub integration is not yet fully implemented. The fields below are placeholders for what will be required.
+                      </AlertDescription>
+                    </Alert>
+                    <div className="space-y-2">
+                      <Label htmlFor="github-repo">Repository URL</Label>
+                      <Input id="github-repo" placeholder="https://github.com/user/repo" />
                     </div>
+                     <div className="space-y-2">
+                      <Label htmlFor="github-token">Personal Access Token</Label>
+                      <Input id="github-token" type="password" placeholder="ghp_..." />
+                       <p className="text-xs text-muted-foreground">
+                        Create a{' '}
+                        <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
+                          personal access token
+                        </Link>{' '}
+                        with repo access.
+                      </p>
+                    </div>
+                    <Button disabled className="w-full">
+                      <Github />
+                      Connect to Repository
+                    </Button>
                   </div>
                 </TabsContent>
               </Tabs>
@@ -410,5 +434,3 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
-
-    
