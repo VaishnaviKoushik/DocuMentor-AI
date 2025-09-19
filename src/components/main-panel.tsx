@@ -219,14 +219,14 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
                   <CardTitle>Code Input</CardTitle>
                   <CardDescription>
                     Paste your code, upload a file, or connect to a GitHub repo.
                   </CardDescription>
                 </div>
-                <div className="w-40">
+                <div className="w-32">
                   <Label htmlFor="language-select" className="sr-only">Language</Label>
                    <Select value={language} onValueChange={setLanguage}>
                     <SelectTrigger id="language-select">
@@ -434,3 +434,5 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
+
+    
