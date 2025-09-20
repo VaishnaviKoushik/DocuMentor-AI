@@ -256,6 +256,10 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   <SelectContent>
                     <SelectItem value="python">Python</SelectItem>
                     <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="cplusplus">C++</SelectItem>
+                    <SelectItem value="go">Go</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -45,7 +45,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an expert documentation generator for code.
 Your task is to analyze the given code and generate docstrings for it.
 The language of the code is {{language}}.
-Generate the docstrings in the conventional format for that language (e.g., reStructuredText for Python, JSDoc for JavaScript).
+Generate the docstrings in the conventional format for that language (e.g., reStructuredText for Python, JSDoc for JavaScript/TypeScript, Javadoc for Java, Doxygen for C++).
 Include summaries, parameter types, and return values based on the code and naming conventions.
 
 Here is the code:
