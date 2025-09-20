@@ -34,7 +34,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs';
-import { Skeleton } from './ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import {
   Accordion,
@@ -57,25 +56,26 @@ import HowItWorks from './how-it-works';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { Skeleton } from './ui/skeleton';
 
 
 const exampleCode = `def calculate_fibonacci(n):
-    """
-    Calculates the nth Fibonacci number.
-
-    This function computes the nth number in the Fibonacci sequence
-    using a simple iterative approach.
-
-    :param n: The position in the Fibonacci sequence.
-    :type n: int
-    :return: The nth Fibonacci number.
-    :rtype: int
-    """
-    if n <= 0:
+    /**
+     * Calculates the nth Fibonacci number.
+     *
+     * This function computes the nth number in the Fibonacci sequence
+     * using a simple iterative approach.
+     *
+     * @param n: The position in the Fibonacci sequence.
+     * @type n: int
+     * @return: The nth Fibonacci number.
+     * @rtype: int
+     */
+    if (n <= 0) {
         return 0
-    elif n == 1:
+    } else if (n == 1) {
         return 1
-    else:
+    } else {
         a, b = 0, 1
         for _ in range(n - 1):
             a, b = b, a + b
@@ -86,7 +86,7 @@ class Greeter:
         self.name = name
 
     def greet(self):
-        # This function is missing a docstring.
+        // This function is missing a docstring.
         print(f"Hello, {self.name}!")
 `;
 
@@ -231,7 +231,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   };
 
   const renderSkeletons = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6 pt-0">
       <Skeleton className="h-8 w-1/3" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-full" />
@@ -246,7 +246,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   );
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-1 flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4 sm:px-6">
         <div>
           <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
@@ -263,229 +263,226 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
           <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
         </Button>
       </header>
-      <main className="p-4 sm:px-6">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <Card className="flex flex-col">
-             <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Code Input</CardTitle>
-                <CardDescription>
-                  Paste code, upload a file, or connect to a GitHub repo.
-                </CardDescription>
-              </div>
-              <div className="w-32">
-                 <Label htmlFor="language-select" className="sr-only">Language</Label>
-                 <Select value={language} onValueChange={setLanguage} disabled={isLoading}>
-                  <SelectTrigger id="language-select">
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="python">Python</SelectItem>
-                    <SelectItem value="javascript">JavaScript</SelectItem>
-                    <SelectItem value="typescript">TypeScript</SelectItem>
-                    <SelectItem value="java">Java</SelectItem>
-                    <SelectItem value="cplusplus">C++</SelectItem>
-                    <SelectItem value="go">Go</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-1 flex-col pt-0">
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                <TabsList className="grid w-full grid-cols-3">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <TabsTrigger value="paste" disabled={isLoading}><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>Paste Code</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <TabsTrigger value="upload" disabled={isLoading}><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>Upload File</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <TabsTrigger value="github" disabled={isLoading}><Github /><span className="sr-only">GitHub</span></TabsTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent>GitHub</TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                </TabsList>
-                <TabsContent value="paste" className="mt-4 flex-1">
-                  <Textarea
-                    ref={textareaRef}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="Paste your code here..."
-                    className="min-h-[400px] resize-none font-code text-sm"
-                    disabled={isLoading}
-                  />
-                </TabsContent>
-                <TabsContent value="upload" className="mt-4">
-                  <div className="flex items-center justify-center w-full">
-                      <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg  bg-card ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'}`}>
-                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                              <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                              <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                              <p className="text-xs text-muted-foreground">.py, .js, .java, etc.</p>
-                          </div>
-                          <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={isLoading} />
-                      </label>
-                  </div> 
-                </TabsContent>
-                <TabsContent value="github" className="mt-4">
-                  <div className="space-y-4">
-                    <Alert>
-                      <Info className="h-4 w-4" />
-                      <AlertTitle>Feature Coming Soon</AlertTitle>
-                      <AlertDescription>
-                        GitHub integration is not yet fully implemented.
-                      </AlertDescription>
-                    </Alert>
-                    <div className="space-y-2">
-                      <Label htmlFor="github-repo">Repository URL</Label>
-                      <Input id="github-repo" placeholder="https://github.com/user/repo" disabled />
-                    </div>
-                     <div className="space-y-2">
-                      <Label htmlFor="github-token">Personal Access Token</Label>
-                      <Input id="github-token" type="password" placeholder="ghp_..." disabled />
-                       <p className="text-xs text-muted-foreground">
-                        Create a{' '}
-                        <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
-                          personal access token
-                        </Link>{' '}
-                        with repo access.
-                      </p>
-                    </div>
-                    <Button disabled className="w-full">
-                      <Github />
-                      Connect to Repository
-                    </Button>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-
-          <div className="overflow-auto">
-            {isLoading || results ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Analysis Results</CardTitle>
-                  <CardDescription>
-                    Explore the generated documentation and suggestions.
-                  </CardDescription>
+      <main className="flex-1 p-4 sm:p-6">
+        <div className="mx-auto flex flex-col gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="flex flex-col">
+                <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                    <CardTitle>Code Input</CardTitle>
+                    <CardDescription>
+                    Paste code, upload a file, or connect to a GitHub repo.
+                    </CardDescription>
+                </div>
+                <div className="w-36">
+                    <Label htmlFor="language-select" className="sr-only">Language</Label>
+                    <Select value={language} onValueChange={setLanguage} disabled={isLoading}>
+                    <SelectTrigger id="language-select">
+                        <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="python">Python</SelectItem>
+                        <SelectItem value="javascript">JavaScript</SelectItem>
+                        <SelectItem value="typescript">TypeScript</SelectItem>
+                        <SelectItem value="java">Java</SelectItem>
+                        <SelectItem value="cplusplus">C++</SelectItem>
+                        <SelectItem value="go">Go</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </div>
                 </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="docstrings" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-                      <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
-                      <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
-                      <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
-                      <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
+                <CardContent className="flex flex-1 flex-col pt-0">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <TabsTrigger value="paste" disabled={isLoading}><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Paste Code</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <TabsTrigger value="upload" disabled={isLoading}><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>Upload File</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                            <TabsTrigger value="github" disabled={true}><Github /><span className="sr-only">GitHub</span></TabsTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>GitHub (coming soon)</TooltipContent>
+                        </Tooltip>
+                        </TooltipProvider>
                     </TabsList>
-                    <div className="mt-4">
-                      <TabsContent value="docstrings">
-                        {isLoading ? renderSkeletons() : (
-                          <div className="space-y-4">
-                             <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-semibold">Generated Docstrings</h3>
+                    <TabsContent value="paste" className="mt-4 flex-1">
+                    <Textarea
+                        ref={textareaRef}
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        placeholder="Paste your code here..."
+                        className="min-h-[400px] flex-1 resize-none font-code text-sm"
+                        disabled={isLoading}
+                    />
+                    </TabsContent>
+                    <TabsContent value="upload" className="mt-4">
+                    <div className="flex items-center justify-center w-full">
+                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg  bg-card ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'}`}>
+                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p className="text-xs text-muted-foreground">.py, .js, .ts, .java, .cpp, .go</p>
+                            </div>
+                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={isLoading} />
+                        </label>
+                    </div> 
+                    </TabsContent>
+                    <TabsContent value="github" className="mt-4">
+                    <div className="space-y-4">
+                        <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertTitle>Feature Coming Soon</AlertTitle>
+                        <AlertDescription>
+                            GitHub integration is not yet fully implemented.
+                        </AlertDescription>
+                        </Alert>
+                        <div className="space-y-2">
+                        <Label htmlFor="github-repo">Repository URL</Label>
+                        <Input id="github-repo" placeholder="https://github.com/user/repo" disabled />
+                        </div>
+                        <div className="space-y-2">
+                        <Label htmlFor="github-token">Personal Access Token</Label>
+                        <Input id="github-token" type="password" placeholder="ghp_..." disabled />
+                        <p className="text-xs text-muted-foreground">
+                            Create a{' '}
+                            <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
+                            personal access token
+                            </Link>{' '}
+                            with repo access.
+                        </p>
+                        </div>
+                        <Button disabled className="w-full">
+                        <Github />
+                        Connect to Repository
+                        </Button>
+                    </div>
+                    </TabsContent>
+                </Tabs>
+                </CardContent>
+            </Card>
+
+            <div className="overflow-hidden">
+                {isLoading ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Analysis Results</CardTitle>
+                        <CardDescription>Generating documentation and suggestions...</CardDescription>
+                    </CardHeader>
+                    {renderSkeletons()}
+                </Card>
+                ) : results ? (
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Analysis Results</CardTitle>
+                    <CardDescription>
+                        Explore the generated documentation and suggestions.
+                    </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                    <Tabs defaultValue="docstrings" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                        <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
+                        <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
+                        <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
+                        <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
+                        </TabsList>
+                        <div className="mt-4">
+                        <TabsContent value="docstrings" className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold">Editable Docstrings</h3>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" onClick={handleCopyToClipboard} disabled={!editedDocstrings}>
+                                <Button variant="ghost" size="sm" onClick={handleCopyToClipboard} disabled={!editedDocstrings}>
                                     {isCopied ? <Check /> : <Clipboard />}
                                     {isCopied ? 'Copied' : 'Copy'}
-                                  </Button>
-                                  <DropdownMenu>
+                                </Button>
+                                <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" disabled={!editedDocstrings}>
+                                    <Button variant="ghost" size="sm" disabled={!editedDocstrings}>
                                         <Download />
                                         Download
-                                      </Button>
+                                    </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent>
-                                      <DropdownMenuItem onSelect={() => handleDownload('md')}>Markdown (.md)</DropdownMenuItem>
-                                      <DropdownMenuItem onSelect={() => handleDownload('html')}>HTML (.html)</DropdownMenuItem>
-                                      <DropdownMenuItem onSelect={() => handleDownload('txt')}>Text (.txt)</DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => handleDownload('md')}>Markdown (.md)</DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => handleDownload('html')}>HTML (.html)</DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => handleDownload('txt')}>Text (.txt)</DropdownMenuItem>
                                     </DropdownMenuContent>
-                                  </DropdownMenu>
+                                </DropdownMenu>
                                 </div>
-                              </div>
-                              <Textarea
+                            </div>
+                            <Textarea
                                 ref={docstringsTextareaRef}
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
                                 className="min-h-[400px] font-code text-sm resize-none"
-                              />
-                          </div>
-                        )}
-                      </TabsContent>
-                      <TabsContent value="improvements">
-                        {isLoading ? renderSkeletons() : (
-                           <div className="space-y-4">
+                            />
+                        </TabsContent>
+                        <TabsContent value="improvements" className="space-y-4">
                             <h3 className="text-lg font-semibold">Improvement Suggestions</h3>
-                              {results?.improvements && results.improvements.length > 0 ? (
-                                 <Accordion type="single" collapsible className="w-full">
-                                  {results.improvements.map((item, index) => (
+                            {results.improvements && results.improvements.length > 0 ? (
+                                <Accordion type="single" collapsible className="w-full">
+                                {results.improvements.map((item, index) => (
                                     <AccordionItem value={`item-${index}`} key={index}>
-                                      <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
-                                      <AccordionContent>{item}</AccordionContent>
+                                    <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
+                                    <AccordionContent>{item}</AccordionContent>
                                     </AccordionItem>
-                                  ))}
+                                ))}
                                 </Accordion>
-                              ) : (
+                            ) : (
                                 <p className="text-muted-foreground">No improvement suggestions found.</p>
-                              )}
-                            </div>
-                        )}
-                      </TabsContent>
-                      <TabsContent value="undocumented">
-                         {isLoading ? renderSkeletons() : (
-                           <div className="space-y-4">
+                            )}
+                        </TabsContent>
+                        <TabsContent value="undocumented" className="space-y-4">
                             <h3 className="text-lg font-semibold">Undocumented Functions</h3>
-                              {results?.undocumented && results.undocumented.length > 0 ? (
+                                {results.undocumented && results.undocumented.length > 0 ? (
                                 <ul className="space-y-3">
-                                  {results.undocumented.map((func, index) => (
-                                    <li key={index} className="flex items-center gap-2">
-                                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                                      <span className="font-code">{func}</span>
+                                {results.undocumented.map((func, index) => (
+                                    <li key={index} className="flex items-center gap-2 rounded-md border p-3">
+                                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                                    <span className="font-code">{func}</span>
                                     </li>
-                                  ))}
+                                ))}
                                 </ul>
-                              ) : (
+                            ) : (
                                 <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
-                              )}
-                            </div>
-                         )}
-                      </TabsContent>
-                      <TabsContent value="summary">
-                         {isLoading ? renderSkeletons() : (
-                           <div className="space-y-4">
+                            )}
+                        </TabsContent>
+                        <TabsContent value="summary" className="space-y-4">
                             <h3 className="text-lg font-semibold">Codebase Summary</h3>
-                              <div className="prose prose-sm dark:prose-invert max-w-none">
-                                {results?.summary.split('\n').map((line, i) => {
-                                  if (line.startsWith('#')) {
+                                <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border p-4">
+                                {results.summary.split('\n').map((line, i) => {
+                                    if (line.startsWith('#')) {
                                     const level = line.match(/^#+/)?.[0].length || 1;
                                     const Tag = `h${level + 1}` as keyof JSX.IntrinsicElements;
                                     return <Tag key={i} className="font-headline">{line.replace(/^#+\s*/, '')}</Tag>;
-                                  }
-                                  if (line.trim() === '') return null;
-                                  return <p key={i}>{line}</p>;
+                                    }
+                                    if (line.trim() === '') return null;
+                                    return <p key={i}>{line}</p>;
                                 }).filter(Boolean)}
-                              </div>
-                            </div>
-                         )}
-                      </TabsContent>
-                    </div>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            ) : <HowItWorks />}
-          </div>
+                                </div>
+                        </TabsContent>
+                        </div>
+                    </Tabs>
+                    </CardContent>
+                </Card>
+                ) : null}
+            </div>
+            </div>
+            <HowItWorks />
         </div>
       </main>
     </div>
   );
 }
+
+    
