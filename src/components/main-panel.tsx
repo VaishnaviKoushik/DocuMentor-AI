@@ -323,10 +323,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     <div className="mt-4">
                       <TabsContent value="docstrings">
                         {isLoading ? renderSkeletons() : (
-                          <Card className="bg-card">
-                            <CardHeader>
-                              <div className="flex justify-between items-center">
-                                <CardTitle className="text-lg">Generated Docstrings</CardTitle>
+                          <div className="space-y-4">
+                             <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold">Generated Docstrings</h3>
                                 <div className="flex items-center gap-2">
                                   <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
                                     {isCopied ? <Check /> : <Clipboard />}
@@ -347,24 +346,18 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                   </DropdownMenu>
                                 </div>
                               </div>
-                            </CardHeader>
-                            <CardContent className="pt-0">
                               <Textarea
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
                                 className="min-h-[400px] font-code text-sm"
                               />
-                            </CardContent>
-                          </Card>
+                          </div>
                         )}
                       </TabsContent>
                       <TabsContent value="improvements">
                         {isLoading ? renderSkeletons() : (
-                           <Card className="bg-card">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Improvement Suggestions</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-0">
+                           <div className="space-y-4">
+                            <h3 className="text-lg font-semibold">Improvement Suggestions</h3>
                               {results?.improvements && results.improvements.length > 0 ? (
                                  <Accordion type="single" collapsible className="w-full">
                                   {results.improvements.map((item, index) => (
@@ -377,17 +370,13 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                               ) : (
                                 <p className="text-muted-foreground">No improvement suggestions found.</p>
                               )}
-                            </CardContent>
-                          </Card>
+                            </div>
                         )}
                       </TabsContent>
                       <TabsContent value="undocumented">
                          {isLoading ? renderSkeletons() : (
-                           <Card className="bg-card">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Undocumented Functions</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-0">
+                           <div className="space-y-4">
+                            <h3 className="text-lg font-semibold">Undocumented Functions</h3>
                               {results?.undocumented && results.undocumented.length > 0 ? (
                                 <ul className="space-y-3">
                                   {results.undocumented.map((func, index) => (
@@ -400,17 +389,13 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                               ) : (
                                 <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
                               )}
-                            </CardContent>
-                          </Card>
+                            </div>
                          )}
                       </TabsContent>
                       <TabsContent value="summary">
                          {isLoading ? renderSkeletons() : (
-                           <Card className="bg-card">
-                            <CardHeader>
-                              <CardTitle className="text-lg">Codebase Summary</CardTitle>
-                            </CardHeader>
-                            <CardContent className="pt-0">
+                           <div className="space-y-4">
+                            <h3 className="text-lg font-semibold">Codebase Summary</h3>
                               <div className="prose prose-sm dark:prose-invert max-w-none">
                                 {results?.summary.split('\n').map((line, i) => {
                                   if (line.startsWith('#')) {
@@ -421,8 +406,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                   return <p key={i}>{line}</p>;
                                 })}
                               </div>
-                            </CardContent>
-                          </Card>
+                            </div>
                          )}
                       </TabsContent>
                     </div>
