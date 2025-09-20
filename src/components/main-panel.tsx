@@ -54,6 +54,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import HowItWorks from './how-it-works';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 
 
 const exampleCode = `def calculate_fibonacci(n):
@@ -220,34 +221,47 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
       <main className="flex-1 overflow-auto p-4 sm:px-6">
         <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <CardTitle>Code Input</CardTitle>
-                  <CardDescription>
-                    Paste your code, upload a file, or connect to a GitHub repo.
-                  </CardDescription>
-                </div>
-                <div className="w-32">
-                  <Label htmlFor="language-select" className="sr-only">Language</Label>
-                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="language-select">
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="python">Python</SelectItem>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+             <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Code Input</CardTitle>
+                <CardDescription>
+                  Paste code, upload a file, or connect to a GitHub repo.
+                </CardDescription>
+              </div>
+              <div className="w-32">
+                 <Label htmlFor="language-select" className="sr-only">Language</Label>
+                 <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger id="language-select">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col pt-0">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="paste"><Code />Paste Code</TabsTrigger>
-                  <TabsTrigger value="upload"><Upload />Upload Files</TabsTrigger>
-                  <TabsTrigger value="github"><Github />GitHub</TabsTrigger>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="paste"><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Paste Code</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="upload"><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>Upload File</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <TabsTrigger value="github"><Github /><span className="sr-only">GitHub</span></TabsTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>GitHub</TooltipContent>
+                    </Tooltip>
                 </TabsList>
                 <TabsContent value="paste" className="mt-4 flex-1">
                   <Textarea
