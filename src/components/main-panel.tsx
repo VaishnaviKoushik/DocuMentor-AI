@@ -105,22 +105,21 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const [activeTab, setActiveTab] = useState('paste');
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const docstringsTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = '0px';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [code]);
 
-  const docstringsTextareaRef = useRef<HTMLTextAreaElement>(null);
-
   useEffect(() => {
     if (docstringsTextareaRef.current) {
-      docstringsTextareaRef.current.style.height = 'auto';
+      docstringsTextareaRef.current.style.height = '0px';
       docstringsTextareaRef.current.style.height = `${docstringsTextareaRef.current.scrollHeight}px`;
     }
-  }, [editedDocstrings]);
+  }, [editedDocstrings, results]);
 
 
   useEffect(() => {
@@ -140,9 +139,20 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   }, [results]);
 
   const handleAnalysis = async () => {
+    if (!code.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Empty Code',
+        description: 'Please enter some code to analyze.',
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setResults(null);
     const response = await analyzeCode(code, language);
+    setIsLoading(false);
+
     if ('error' in response) {
       toast({
         variant: 'destructive',
@@ -151,6 +161,10 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
       });
     } else {
       setResults(response);
+      toast({
+        title: 'Analysis Complete',
+        description: 'Documentation and suggestions have been generated.',
+      });
       // Save to history
       try {
         const historyCollection = collection(db, 'analysisHistory');
@@ -160,25 +174,22 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
           results: response,
           createdAt: serverTimestamp(),
         });
-        toast({
-          title: 'Session Saved',
-          description: 'Your analysis session has been saved to Firestore.',
-        });
+        
       } catch (error) {
         console.error('Error adding document: ', error);
         toast({
           variant: 'destructive',
           title: 'Failed to Save Session',
-          description: 'Could not save the analysis session to the database.',
+          description: 'Your analysis was successful, but it could not be saved to your history.',
         });
       }
     }
-    setIsLoading(false);
   };
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(editedDocstrings);
     setIsCopied(true);
+    toast({ title: 'Copied to clipboard!'})
     setTimeout(() => setIsCopied(false), 2000);
   };
 
@@ -220,12 +231,16 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   };
 
   const renderSkeletons = () => (
-    <div className="space-y-4 p-1">
+    <div className="space-y-4">
       <Skeleton className="h-8 w-1/3" />
       <div className="space-y-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-5/6" />
+      </div>
+      <div className="space-y-2 pt-4">
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
       </div>
     </div>
   );
@@ -239,7 +254,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
             Generate documentation and receive improvement suggestions for your code.
           </p>
         </div>
-        <Button onClick={handleAnalysis} disabled={isLoading || !code.trim()} size="lg">
+        <Button onClick={handleAnalysis} disabled={isLoading} size="lg">
           {isLoading ? (
             <LoaderCircle className="animate-spin" />
           ) : (
@@ -248,7 +263,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
           <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
         </Button>
       </header>
-      <main className="flex-1 overflow-auto p-4 sm:px-6">
+      <main className="p-4 sm:px-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
              <CardHeader className="flex flex-row items-center justify-between">
@@ -260,7 +275,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
               </div>
               <div className="w-32">
                  <Label htmlFor="language-select" className="sr-only">Language</Label>
-                 <Select value={language} onValueChange={setLanguage}>
+                 <Select value={language} onValueChange={setLanguage} disabled={isLoading}>
                   <SelectTrigger id="language-select">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
@@ -275,25 +290,25 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                 </Select>
               </div>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col pt-0">
+            <CardContent className="flex flex-1 flex-col pt-0">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <TabsTrigger value="paste"><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
+                          <TabsTrigger value="paste" disabled={isLoading}><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
                         </TooltipTrigger>
                         <TooltipContent>Paste Code</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <TabsTrigger value="upload"><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
+                          <TabsTrigger value="upload" disabled={isLoading}><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
                         </TooltipTrigger>
                         <TooltipContent>Upload File</TooltipContent>
                       </Tooltip>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <TabsTrigger value="github"><Github /><span className="sr-only">GitHub</span></TabsTrigger>
+                          <TabsTrigger value="github" disabled={isLoading}><Github /><span className="sr-only">GitHub</span></TabsTrigger>
                         </TooltipTrigger>
                         <TooltipContent>GitHub</TooltipContent>
                       </Tooltip>
@@ -305,18 +320,19 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Paste your code here..."
-                    className="h-full min-h-[400px] resize-none font-code text-sm overflow-hidden"
+                    className="min-h-[400px] resize-none font-code text-sm"
+                    disabled={isLoading}
                   />
                 </TabsContent>
                 <TabsContent value="upload" className="mt-4">
                   <div className="flex items-center justify-center w-full">
-                      <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-card hover:bg-muted/50">
+                      <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg  bg-card ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'}`}>
                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
                               <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
                               <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                               <p className="text-xs text-muted-foreground">.py, .js, .java, etc.</p>
                           </div>
-                          <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} />
+                          <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={isLoading} />
                       </label>
                   </div> 
                 </TabsContent>
@@ -326,16 +342,16 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                       <Info className="h-4 w-4" />
                       <AlertTitle>Feature Coming Soon</AlertTitle>
                       <AlertDescription>
-                        GitHub integration is not yet fully implemented. The fields below are placeholders for what will be required.
+                        GitHub integration is not yet fully implemented.
                       </AlertDescription>
                     </Alert>
                     <div className="space-y-2">
                       <Label htmlFor="github-repo">Repository URL</Label>
-                      <Input id="github-repo" placeholder="https://github.com/user/repo" />
+                      <Input id="github-repo" placeholder="https://github.com/user/repo" disabled />
                     </div>
                      <div className="space-y-2">
                       <Label htmlFor="github-token">Personal Access Token</Label>
-                      <Input id="github-token" type="password" placeholder="ghp_..." />
+                      <Input id="github-token" type="password" placeholder="ghp_..." disabled />
                        <p className="text-xs text-muted-foreground">
                         Create a{' '}
                         <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
@@ -363,7 +379,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     Explore the generated documentation and suggestions.
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="pt-0">
+                <CardContent>
                   <Tabs defaultValue="docstrings" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                       <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
@@ -378,13 +394,13 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                              <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-semibold">Generated Docstrings</h3>
                                 <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" onClick={handleCopyToClipboard}>
+                                  <Button variant="ghost" size="sm" onClick={handleCopyToClipboard} disabled={!editedDocstrings}>
                                     {isCopied ? <Check /> : <Clipboard />}
-                                    {isCopied ? 'Copied!' : 'Copy'}
+                                    {isCopied ? 'Copied' : 'Copy'}
                                   </Button>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm">
+                                      <Button variant="ghost" size="sm" disabled={!editedDocstrings}>
                                         <Download />
                                         Download
                                       </Button>
@@ -401,7 +417,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                 ref={docstringsTextareaRef}
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
-                                className="min-h-[400px] font-code text-sm resize-none overflow-hidden"
+                                className="min-h-[400px] font-code text-sm resize-none"
                               />
                           </div>
                         )}
@@ -455,8 +471,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                     const Tag = `h${level + 1}` as keyof JSX.IntrinsicElements;
                                     return <Tag key={i} className="font-headline">{line.replace(/^#+\s*/, '')}</Tag>;
                                   }
+                                  if (line.trim() === '') return null;
                                   return <p key={i}>{line}</p>;
-                                })}
+                                }).filter(Boolean)}
                               </div>
                             </div>
                          )}
@@ -465,11 +482,8 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   </Tabs>
                 </CardContent>
               </Card>
-            ) : null}
+            ) : <HowItWorks />}
           </div>
-        </div>
-        <div className="mt-6">
-            <HowItWorks />
         </div>
       </main>
     </div>

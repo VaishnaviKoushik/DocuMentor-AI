@@ -1,16 +1,27 @@
 // src/components/history-panel.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState }from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { HistoryItem } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
 import { Eye, History, LoaderCircle, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { collection, getDocs, orderBy, query, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, orderBy, query, deleteDoc, doc, writeBatch } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 type HistoryPanelProps = {
   onSelectHistory: (item: HistoryItem) => void;
@@ -19,6 +30,7 @@ type HistoryPanelProps = {
 export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isClearing, setIsClearing] = useState(false);
   const { toast } = useToast();
 
   const fetchHistory = async () => {
@@ -37,7 +49,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
       toast({
         variant: 'destructive',
         title: 'Failed to fetch history',
-        description: 'Could not retrieve analysis sessions from the database. Please make sure your Firestore security rules are set up correctly.',
+        description: 'Could not retrieve analysis sessions. Please check your Firestore security rules and network connection.',
       });
     }
     setIsLoading(false);
@@ -48,32 +60,45 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   }, []);
 
   const handleDelete = async (id: string) => {
+    // Optimistically update UI
+    const originalHistory = [...history];
+    setHistory(history.filter((item) => item.id !== id));
+    
     try {
       await deleteDoc(doc(db, 'analysisHistory', id));
-      const updatedHistory = history.filter((item) => item.id !== id);
-      setHistory(updatedHistory);
       toast({
         title: 'Session Deleted',
         description: 'The analysis session has been removed.',
       });
     } catch (error) {
+      // Revert UI on error
+      setHistory(originalHistory);
       console.error("Error deleting document: ", error);
       toast({
         variant: 'destructive',
         title: 'Delete Failed',
-        description: 'Could not delete the session from the database.',
+        description: 'Could not delete the session.',
       });
     }
   };
   
   const handleClearHistory = async () => {
-    // This is a destructive operation, let's delete one by one
-    // to show progress and allow for potential recovery/undo.
-    // In a real app, you might want a backend function for this.
+    setIsClearing(true);
     try {
-      for (const item of history) {
-        await deleteDoc(doc(db, 'analysisHistory', item.id));
+      const historyCollection = collection(db, 'analysisHistory');
+      const querySnapshot = await getDocs(historyCollection);
+      if (querySnapshot.empty) {
+        toast({ title: 'History is already empty.' });
+        setIsClearing(false);
+        return;
       }
+      
+      const batch = writeBatch(db);
+      querySnapshot.docs.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+
       setHistory([]);
       toast({
         title: 'History Cleared',
@@ -87,6 +112,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
         description: 'Could not clear all sessions from the database.',
       });
     }
+    setIsClearing(false);
   };
 
   return (
@@ -95,14 +121,37 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
         <div>
           <h1 className="font-headline text-2xl font-bold">Analysis History</h1>
           <p className="text-muted-foreground">
-            Review your past analysis sessions.
+            Review your past analysis sessions saved in the cloud.
           </p>
         </div>
         {history.length > 0 && (
-          <Button variant="destructive" onClick={handleClearHistory}>
-            <Trash2 className="mr-2" />
-            Clear History
-          </Button>
+           <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" disabled={isClearing}>
+                {isClearing ? (
+                  <LoaderCircle className="mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="mr-2" />
+                )}
+                Clear History
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete all
+                  your analysis history from the server.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleClearHistory}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </header>
       <main className="flex-1 p-4 sm:px-6">
@@ -130,7 +179,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                       <div>
                         <p className="font-semibold">
                           Analysis from{' '}
-                          {formatDistanceToNow(item.createdAt.toDate(), { addSuffix: true })}
+                          {item.createdAt ? formatDistanceToNow(item.createdAt.toDate(), { addSuffix: true }) : 'an unknown time'}
                            <span className="ml-2 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">{item.language}</span>
                         </p>
                         <p className="text-sm text-muted-foreground truncate max-w-md">
@@ -146,15 +195,32 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
                           <Eye />
                           <span className="sr-only">View</span>
                         </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(item.id)}
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 />
-                          <span className="sr-only">Delete</span>
-                        </Button>
+                         <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                             <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete this analysis session.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(item.id)}>
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </Card>
                   ))}

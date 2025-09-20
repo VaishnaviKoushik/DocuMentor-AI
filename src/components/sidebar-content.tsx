@@ -10,7 +10,7 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { BrainCircuit, Github, Home, History, Settings } from 'lucide-react';
+import { BrainCircuit, Github, Home, History, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { type View } from '@/app/page';
 
@@ -53,7 +53,7 @@ export default function AppSidebarContent({
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton href="#">
+          <SidebarMenuButton href="#" disabled>
             <Settings />
             Settings
           </SidebarMenuButton>
@@ -63,7 +63,7 @@ export default function AppSidebarContent({
       <SidebarFooter>
         <div className="text-xs text-sidebar-foreground/70">
           <p>&copy; {new Date().getFullYear()} DocuMentor AI</p>
-          <Link href="#" className="hover:text-sidebar-foreground">
+          <Link href="https://github.com/firebase/studio-doc-mentor" target="_blank" className="hover:text-sidebar-foreground">
             <div className="flex items-center gap-2 mt-2">
               <Github size={16} />
               <span>View on GitHub</span>

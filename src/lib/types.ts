@@ -8,5 +8,5 @@ export type HistoryItem = {
     code: string;
     language: string;
     results: AnalysisResults;
-    createdAt: Timestamp;
+    createdAt: Timestamp; // Ensure createdAt is always a Timestamp
 };
