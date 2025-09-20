@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   AlertTriangle,
   BookOpenText,
@@ -54,7 +54,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import HowItWorks from './how-it-works';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 
 const exampleCode = `def calculate_fibonacci(n):
@@ -101,6 +101,25 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('paste');
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [code]);
+
+  const docstringsTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (docstringsTextareaRef.current) {
+      docstringsTextareaRef.current.style.height = 'auto';
+      docstringsTextareaRef.current.style.height = `${docstringsTextareaRef.current.scrollHeight}px`;
+    }
+  }, [editedDocstrings]);
+
 
   useEffect(() => {
     if (selectedHistoryItem) {
@@ -244,31 +263,34 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
             <CardContent className="flex-1 flex flex-col pt-0">
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-3">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <TabsTrigger value="paste"><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>Paste Code</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <TabsTrigger value="upload"><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>Upload File</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <TabsTrigger value="github"><Github /><span className="sr-only">GitHub</span></TabsTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent>GitHub</TooltipContent>
-                    </Tooltip>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <TabsTrigger value="paste"><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Paste Code</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <TabsTrigger value="upload"><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>Upload File</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <TabsTrigger value="github"><Github /><span className="sr-only">GitHub</span></TabsTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>GitHub</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                 </TabsList>
                 <TabsContent value="paste" className="mt-4 flex-1">
                   <Textarea
+                    ref={textareaRef}
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="Paste your code here..."
-                    className="h-full min-h-[400px] resize-none font-code text-sm"
+                    className="h-full min-h-[400px] resize-none font-code text-sm overflow-hidden"
                   />
                 </TabsContent>
                 <TabsContent value="upload" className="mt-4">
@@ -361,9 +383,10 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                 </div>
                               </div>
                               <Textarea
+                                ref={docstringsTextareaRef}
                                 value={editedDocstrings}
                                 onChange={(e) => setEditedDocstrings(e.target.value)}
-                                className="min-h-[400px] font-code text-sm"
+                                className="min-h-[400px] font-code text-sm resize-none overflow-hidden"
                               />
                           </div>
                         )}
@@ -437,3 +460,5 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
+
+    
