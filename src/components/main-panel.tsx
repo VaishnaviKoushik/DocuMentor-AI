@@ -217,7 +217,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
           <span>{isLoading ? 'Analyzing...' : 'Generate Documentation'}</span>
         </Button>
       </header>
-      <main className="flex-1 overflow-hidden p-4 sm:px-6">
+      <main className="flex-1 overflow-auto p-4 sm:px-6">
         <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
             <CardHeader>
@@ -429,10 +429,11 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   </Tabs>
                 </CardContent>
               </Card>
-            ) : (
-              <HowItWorks />
-            )}
+            ) : null}
           </div>
+        </div>
+        <div className="mt-6">
+            <HowItWorks />
         </div>
       </main>
     </div>
