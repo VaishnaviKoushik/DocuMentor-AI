@@ -35,7 +35,7 @@ export default function HistoryPanel({ onSelectHistory }: HistoryPanelProps) {
   };
 
   return (
-    <div className="flex h-full min-h-screen flex-col">
+    <div className="flex h-full flex-col">
        <header className="flex items-center justify-between border-b p-4 sm:px-6">
         <div>
           <h1 className="font-headline text-2xl font-bold">Analysis History</h1>

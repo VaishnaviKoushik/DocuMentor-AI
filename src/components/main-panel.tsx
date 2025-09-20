@@ -220,7 +220,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   );
 
   return (
-    <div className="flex h-full min-h-screen flex-col">
+    <div className="flex flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4 sm:px-6">
         <div>
           <h1 className="font-headline text-2xl font-bold">Code Analyzer</h1>
@@ -238,7 +238,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         </Button>
       </header>
       <main className="flex-1 overflow-auto p-4 sm:px-6">
-        <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <Card className="flex flex-col">
              <CardHeader className="flex flex-row items-center justify-between">
               <div>
@@ -460,5 +460,3 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
-
-    
