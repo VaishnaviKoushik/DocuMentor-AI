@@ -53,6 +53,8 @@ import { type HistoryItem } from '@/lib/types';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import HowItWorks from './how-it-works';
+
 
 const exampleCode = `def calculate_fibonacci(n):
     """
@@ -302,7 +304,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
           </Card>
 
           <div className="overflow-auto">
-            {(isLoading || results) && (
+            {isLoading || results ? (
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle>Analysis Results</CardTitle>
@@ -427,6 +429,8 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                   </Tabs>
                 </CardContent>
               </Card>
+            ) : (
+              <HowItWorks />
             )}
           </div>
         </div>
@@ -434,5 +438,3 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
-
-    
