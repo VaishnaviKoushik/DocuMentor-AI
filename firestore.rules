@@ -1,0 +1,16 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write access to the analysisHistory collection
+    // for any authenticated user.
+    // For a production app, you would likely want to restrict this
+    // to only the user who created the document.
+    // e.g., match /analysisHistory/{docId} {
+    //   allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+    // }
+    match /analysisHistory/{docId} {
+      allow read, write: if true; // Insecure: allows any client to read/write.
+    }
+  }
+}

@@ -55,6 +55,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import HowItWorks from './how-it-works';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 
 const exampleCode = `def calculate_fibonacci(n):
@@ -150,17 +152,26 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     } else {
       setResults(response);
       // Save to history
-      const historyItem: HistoryItem = {
-        id: new Date().toISOString(),
-        code,
-        language,
-        results: response,
-      };
-      const history = JSON.parse(localStorage.getItem('analysisHistory') || '[]');
-      localStorage.setItem(
-        'analysisHistory',
-        JSON.stringify([historyItem, ...history])
-      );
+      try {
+        const historyCollection = collection(db, 'analysisHistory');
+        await addDoc(historyCollection, {
+          code,
+          language,
+          results: response,
+          createdAt: serverTimestamp(),
+        });
+        toast({
+          title: 'Session Saved',
+          description: 'Your analysis session has been saved to Firestore.',
+        });
+      } catch (error) {
+        console.error('Error adding document: ', error);
+        toast({
+          variant: 'destructive',
+          title: 'Failed to Save Session',
+          description: 'Could not save the analysis session to the database.',
+        });
+      }
     }
     setIsLoading(false);
   };
@@ -345,7 +356,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
 
           <div className="overflow-auto">
             {isLoading || results ? (
-              <Card className="h-full">
+              <Card>
                 <CardHeader>
                   <CardTitle>Analysis Results</CardTitle>
                   <CardDescription>
