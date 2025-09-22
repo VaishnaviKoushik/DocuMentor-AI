@@ -57,7 +57,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
-import { cn } from '@/lib/utils';
 
 
 const exampleCode = `def calculate_fibonacci(n):
@@ -246,8 +245,6 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 
-  const showResults = isLoading || results;
-
   return (
     <div className="flex flex-1 flex-col">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b p-4 sm:px-6">
@@ -267,11 +264,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         </Button>
       </header>
       <main className="flex-1 p-4 sm:p-6">
-        <div className="mx-auto flex flex-col gap-6">
-            <div className={cn(
-              "grid grid-cols-1 gap-6",
-              showResults && "lg:grid-cols-2"
-            )}>
+        <div className="mx-auto grid grid-cols-1 gap-6 lg:grid-cols-2">
             <Card className="flex flex-col">
                 <CardHeader className="flex flex-row items-start justify-between gap-4">
                 <div>
@@ -376,102 +369,99 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                 </Tabs>
                 </CardContent>
             </Card>
-            {showResults && (
-              <div className="overflow-hidden">
-                  {isLoading ? (
-                  <Card>
-                      <CardHeader>
-                          <CardTitle>Analysis Results</CardTitle>
-                          <CardDescription>Generating documentation and suggestions...</CardDescription>
-                      </CardHeader>
-                      {renderSkeletons()}
-                  </Card>
-                  ) : results ? (
-                  <Card>
-                      <CardHeader>
-                      <CardTitle>Analysis Results</CardTitle>
-                      <CardDescription>
-                          Explore the generated documentation and suggestions.
-                      </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                      <Tabs defaultValue="docstrings" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
-                          <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
-                          <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
-                          </TabsList>
-                          <div className="mt-4">
-                          <TabsContent value="docstrings" className="space-y-4">
-                              <div className="flex justify-between items-center">
-                                  <h3 className="text-lg font-semibold">Editable Docstrings</h3>
-                                  <div className="flex items-center gap-2">
-                                  <Button variant="ghost" size="sm" onClick={handleCopyToClipboard} disabled={!editedDocstrings}>
-                                      {isCopied ? <Check /> : <Clipboard />}
-                                      {isCopied ? 'Copied' : 'Copy'}
-                                  </Button>
-                                  <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" disabled={!editedDocstrings}>
-                                          <Download />
-                                          Download
-                                      </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent>
-                                      <DropdownMenuItem onSelect={() => handleDownload('md')}>Markdown (.md)</DropdownMenuItem>
-                                      <DropdownMenuItem onSelect={() => handleDownload('html')}>HTML (.html)</DropdownMenuItem>
-                                      <DropdownMenuItem onSelect={() => handleDownload('txt')}>Text (.txt)</DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                  </DropdownMenu>
-                                  </div>
-                              </div>
-                              <Textarea
-                                  ref={docstringsTextareaRef}
-                                  value={editedDocstrings}
-                                  onChange={(e) => setEditedDocstrings(e.target.value)}
-                                  className="min-h-[400px] font-code text-sm resize-none"
-                              />
-                          </TabsContent>
-                          <TabsContent value="improvements" className="space-y-4">
-                              <h3 className="text-lg font-semibold">Improvement Suggestions</h3>
-                              {results.improvements && results.improvements.length > 0 ? (
-                                  <Accordion type="single" collapsible className="w-full">
-                                  {results.improvements.map((item, index) => (
-                                      <AccordionItem value={`item-${index}`} key={index}>
-                                      <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
-                                      <AccordionContent>{item}</AccordionContent>
-                                      </AccordionItem>
-                                  ))}
-                                  </Accordion>
-                              ) : (
-                                  <p className="text-muted-foreground">No improvement suggestions found.</p>
-                              )}
-                          </TabsContent>
-                          <TabsContent value="undocumented" className="space-y-4">
-                              <h3 className="text-lg font-semibold">Undocumented Functions</h3>
-                                  {results.undocumented && results.undocumented.length > 0 ? (
-                                  <ul className="space-y-3">
-                                  {results.undocumented.map((func, index) => (
-                                      <li key={index} className="flex items-center gap-2 rounded-md border p-3">
-                                      <AlertTriangle className="h-5 w-5 text-destructive" />
-                                      <span className="font-code">{func}</span>
-                                      </li>
-                                  ))}
-                                  </ul>
-                              ) : (
-                                  <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
-                              )}
-                          </TabsContent>
-                          </div>
-                      </Tabs>
-                      </CardContent>
-                  </Card>
-                  ) : null}
-              </div>
-            )}
-
+            <div className="overflow-hidden">
+                {isLoading ? (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Analysis Results</CardTitle>
+                        <CardDescription>Generating documentation and suggestions...</CardDescription>
+                    </CardHeader>
+                    {renderSkeletons()}
+                </Card>
+                ) : results ? (
+                <Card>
+                    <CardHeader>
+                    <CardTitle>Analysis Results</CardTitle>
+                    <CardDescription>
+                        Explore the generated documentation and suggestions.
+                    </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                    <Tabs defaultValue="docstrings" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
+                        <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
+                        <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
+                        </TabsList>
+                        <div className="mt-4">
+                        <TabsContent value="docstrings" className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold">Editable Docstrings</h3>
+                                <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="sm" onClick={handleCopyToClipboard} disabled={!editedDocstrings}>
+                                    {isCopied ? <Check /> : <Clipboard />}
+                                    {isCopied ? 'Copied' : 'Copy'}
+                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" disabled={!editedDocstrings}>
+                                        <Download />
+                                        Download
+                                    </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                    <DropdownMenuItem onSelect={() => handleDownload('md')}>Markdown (.md)</DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => handleDownload('html')}>HTML (.html)</DropdownMenuItem>
+                                    <DropdownMenuItem onSelect={() => handleDownload('txt')}>Text (.txt)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                </div>
+                            </div>
+                            <Textarea
+                                ref={docstringsTextareaRef}
+                                value={editedDocstrings}
+                                onChange={(e) => setEditedDocstrings(e.target.value)}
+                                className="min-h-[400px] font-code text-sm resize-none"
+                            />
+                        </TabsContent>
+                        <TabsContent value="improvements" className="space-y-4">
+                            <h3 className="text-lg font-semibold">Improvement Suggestions</h3>
+                            {results.improvements && results.improvements.length > 0 ? (
+                                <Accordion type="single" collapsible className="w-full">
+                                {results.improvements.map((item, index) => (
+                                    <AccordionItem value={`item-${index}`} key={index}>
+                                    <AccordionTrigger>Suggestion #{index + 1}</AccordionTrigger>
+                                    <AccordionContent>{item}</AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                                </Accordion>
+                            ) : (
+                                <p className="text-muted-foreground">No improvement suggestions found.</p>
+                            )}
+                        </TabsContent>
+                        <TabsContent value="undocumented" className="space-y-4">
+                            <h3 className="text-lg font-semibold">Undocumented Functions</h3>
+                                {results.undocumented && results.undocumented.length > 0 ? (
+                                <ul className="space-y-3">
+                                {results.undocumented.map((func, index) => (
+                                    <li key={index} className="flex items-center gap-2 rounded-md border p-3">
+                                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                                    <span className="font-code">{func}</span>
+                                    </li>
+                                ))}
+                                </ul>
+                            ) : (
+                                <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
+                            )}
+                        </TabsContent>
+                        </div>
+                    </Tabs>
+                    </CardContent>
+                </Card>
+                ) : (
+                  <HowItWorks />
+                )}
             </div>
-            {!showResults && <HowItWorks />}
         </div>
       </main>
     </div>
