@@ -34,6 +34,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI documentation assistant that analyzes code and suggests improvements to existing docstrings and identifies missing docstrings.
 
   Analyze the following {{language}} code and provide a list of suggestions for improving existing docstrings and identifying missing docstrings. Be specific and provide actionable advice.
+  Return the suggestions as a JSON object with a 'suggestions' field containing an array of strings.
 
   Code:
   {{{code}}}`,
