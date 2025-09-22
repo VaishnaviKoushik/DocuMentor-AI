@@ -417,10 +417,11 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     </CardHeader>
                     <CardContent>
                     <Tabs defaultValue="docstrings" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                        <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
                         <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
                         <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
+                        <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
                         </TabsList>
                         <div className="mt-4">
                         <TabsContent value="docstrings" className="space-y-4">
@@ -481,6 +482,14 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                                 </ul>
                             ) : (
                                 <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
+                            )}
+                        </TabsContent>
+                         <TabsContent value="summary" className="space-y-4">
+                            <h3 className="text-lg font-semibold">Code Summary</h3>
+                            {results.summary ? (
+                                <div className="prose prose-sm dark:prose-invert rounded-md border p-4" dangerouslySetInnerHTML={{ __html: results.summary.replace(/\n/g, '<br />') }} />
+                            ) : (
+                                <p className="text-muted-foreground">No summary could be generated for this code.</p>
                             )}
                         </TabsContent>
                         </div>

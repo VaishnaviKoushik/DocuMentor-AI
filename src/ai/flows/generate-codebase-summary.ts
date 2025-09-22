@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Generates a top-level README file summarizing the codebase structure and purpose.
+ * @fileOverview Generates a README-style summary for a given code snippet.
  *
- * - generateCodebaseSummary - A function that generates the codebase summary.
+ * - generateCodebaseSummary - A function that generates the code summary.
  * - GenerateCodebaseSummaryInput - The input type for the generateCodebaseSummary function.
  * - GenerateCodebaseSummaryOutput - The return type for the generateCodebaseSummary function.
  */
@@ -12,14 +12,14 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateCodebaseSummaryInputSchema = z.object({
-  codebaseDescription: z
+  code: z
     .string()
-    .describe('A detailed description of the entire codebase.'),
+    .describe('The code snippet to summarize.'),
 });
 export type GenerateCodebaseSummaryInput = z.infer<typeof GenerateCodebaseSummaryInputSchema>;
 
 const GenerateCodebaseSummaryOutputSchema = z.object({
-  readmeContent: z.string().describe('The generated content for the top-level README.md file.'),
+  summary: z.string().describe('The generated README-style summary of the code.'),
 });
 export type GenerateCodebaseSummaryOutput = z.infer<typeof GenerateCodebaseSummaryOutputSchema>;
 
@@ -31,9 +31,13 @@ const prompt = ai.definePrompt({
   name: 'generateCodebaseSummaryPrompt',
   input: {schema: GenerateCodebaseSummaryInputSchema},
   output: {schema: GenerateCodebaseSummaryOutputSchema},
-  prompt: `You are an expert documentation writer. Given the following description of a codebase, generate a top-level README.md file that provides a comprehensive overview of the entire codebase structure and purpose. The README should be well-structured, clear, and concise, suitable for new contributors to quickly understand the project and its goals. Use a developer tone -- clear, professional, concise, and helpful.
+  prompt: `You are an expert documentation writer. Given the following code snippet, generate a README-style summary. The summary should be well-structured, clear, and concise, explaining the code's purpose, functions, and overall structure. Use a developer tone -- clear, professional, concise, and helpful. Use markdown for formatting.
 
-Codebase Description: {{{codebaseDescription}}}`,
+Code Snippet:
+\`\`\`
+{{{code}}}
+\`\`\`
+`,
 });
 
 const generateCodebaseSummaryFlow = ai.defineFlow(
