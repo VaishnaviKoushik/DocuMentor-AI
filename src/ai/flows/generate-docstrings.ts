@@ -42,18 +42,19 @@ const prompt = ai.definePrompt({
   name: 'generateDocstringsPrompt',
   input: {schema: GenerateDocstringsInputSchema},
   output: {schema: GenerateDocstringsOutputSchema},
-  prompt: `You are an expert documentation generator for code.
-Your task is to analyze the given code and generate docstrings for it.
+  prompt: `You are an expert programmer and documentation writer. Your task is to write concise, accurate docstrings for the provided code.
+
+Analyze the following {{language}} code in-depth. Pay close attention to function signatures, logic, and variable names to infer purpose, parameter types, and return values.
+
 The language of the code is {{language}}.
 Generate the docstrings in the conventional format for that language (e.g., reStructuredText for Python, JSDoc for JavaScript/TypeScript, Javadoc for Java, Doxygen for C++).
-Include summaries, parameter types, and return values based on the code and naming conventions.
+
+Your output should ONLY be the code with the added docstrings. Do not include any explanatory text before or after the code.
 
 Here is the code:
 \`\`\`{{language}}
 {{{code}}}
 \`\`\`
-
-Generate the docstrings:
 `,
 });
 
