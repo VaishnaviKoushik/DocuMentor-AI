@@ -4,13 +4,11 @@
 import { generateDocstrings } from '@/ai/flows/generate-docstrings';
 import { suggestImprovementsAndMissingDocstrings } from '@/ai/flows/suggest-improvements-docstrings';
 import { flagUndocumentedFunctions } from '@/ai/flows/flag-undocumented-functions';
-import { generateCodebaseSummary } from '@/ai/flows/generate-codebase-summary';
 
 export type AnalysisResults = {
   docstrings: string;
   improvements: string[];
   undocumented: string[];
-  summary: string;
 };
 
 export async function analyzeCode(
@@ -23,23 +21,20 @@ export async function analyzeCode(
         docstrings: '',
         improvements: [],
         undocumented: [],
-        summary: '',
       };
     }
 
-    const [docstringsResult, improvementsResult, undocumentedResult, summaryResult] =
+    const [docstringsResult, improvementsResult, undocumentedResult] =
       await Promise.all([
         generateDocstrings({ code, language }),
         suggestImprovementsAndMissingDocstrings({ code, language }),
         flagUndocumentedFunctions({ code, language }),
-        generateCodebaseSummary({ codebaseDescription: code }),
       ]);
 
     return {
       docstrings: docstringsResult.docstrings,
       improvements: improvementsResult.suggestions,
       undocumented: undocumentedResult.undocumentedFunctions,
-      summary: summaryResult.readmeContent,
     };
   } catch (error) {
     console.error('Error during code analysis:', error);

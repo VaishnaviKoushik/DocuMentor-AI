@@ -396,11 +396,10 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                       </CardHeader>
                       <CardContent>
                       <Tabs defaultValue="docstrings" className="w-full">
-                          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                          <TabsList className="grid w-full grid-cols-3">
                           <TabsTrigger value="docstrings"><FileText />Docstrings</TabsTrigger>
                           <TabsTrigger value="improvements"><Lightbulb />Improvements</TabsTrigger>
                           <TabsTrigger value="undocumented"><AlertTriangle />Undocumented</TabsTrigger>
-                          <TabsTrigger value="summary"><BookOpenText />Summary</TabsTrigger>
                           </TabsList>
                           <div className="mt-4">
                           <TabsContent value="docstrings" className="space-y-4">
@@ -462,20 +461,6 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                               ) : (
                                   <p className="text-muted-foreground">All public functions seem to be documented. Great job!</p>
                               )}
-                          </TabsContent>
-                          <TabsContent value="summary" className="space-y-4">
-                              <h3 className="text-lg font-semibold">Codebase Summary</h3>
-                                  <div className="prose prose-sm dark:prose-invert max-w-none rounded-lg border p-4">
-                                  {results.summary.split('\n').map((line, i) => {
-                                      if (line.startsWith('#')) {
-                                      const level = line.match(/^#+/)?.[0].length || 1;
-                                      const Tag = `h${level + 1}` as keyof JSX.IntrinsicElements;
-                                      return <Tag key={i} className="font-headline">{line.replace(/^#+\s*/, '')}</Tag>;
-                                      }
-                                      if (line.trim() === '') return null;
-                                      return <p key={i}>{line}</p>;
-                                  }).filter(Boolean)}
-                                  </div>
                           </TabsContent>
                           </div>
                       </Tabs>
