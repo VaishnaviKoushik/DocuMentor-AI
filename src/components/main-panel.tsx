@@ -59,35 +59,43 @@ import { db } from '@/lib/firebase';
 import { Skeleton } from './ui/skeleton';
 
 
-const exampleCode = `def calculate_fibonacci(n):
-    """
-     * Calculates the nth Fibonacci number.
-     *
-     * This function computes the nth number in the Fibonacci sequence
-     * using a simple iterative approach.
-     *
-     * @param n: The position in the Fibonacci sequence.
-     * @type n: int
-     * @return: The nth Fibonacci number.
-     * @rtype: int
-     */
-    if (n <= 0) {
-        return 0
-    } else if (n == 1) {
-        return 1
-    } else {
-        a, b = 0, 1
-        for _ in range(n - 1):
-            a, b = b, a + b
-        return b
+const jsExampleCode = `
+/**
+ * Represents a book.
+ * @constructor
+ * @param {string} title - The title of the book.
+ * @param {string} author - The author of the book.
+ */
+function Book(title, author) {
+  this.title = title;
+  this.author = author;
+}
 
-class Greeter:
-    def __init__(self, name):
-        self.name = name
+// A function to get the book's details
+function getBookDetails(book) {
+  return book.title + " by " + book.author;
+}
+`;
 
-    def greet(self):
-        // This function is missing a docstring.
-        print(f"Hello, {self.name}!")
+const goExampleCode = `
+package main
+
+import "fmt"
+
+// Add adds two integers together.
+// It takes two integers and returns their sum.
+func Add(x, y int) int {
+	return x + y
+}
+
+// This function is missing a comment.
+func Subtract(x, y int) int {
+	return x - y
+}
+
+func main() {
+	fmt.Println("Hello, Go!")
+}
 `;
 
 type MainPanelProps = {
@@ -95,8 +103,8 @@ type MainPanelProps = {
 };
 
 export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
-  const [code, setCode] = useState(exampleCode);
-  const [language, setLanguage] = useState('python');
+  const [code, setCode] = useState(jsExampleCode);
+  const [language, setLanguage] = useState('javascript');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<AnalysisResults | null>(null);
   const [editedDocstrings, setEditedDocstrings] = useState('');
@@ -125,9 +133,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   useEffect(() => {
     if (selectedHistoryItem) {
       setCode(selectedHistoryItem.code);
-      if (selectedHistoryItem.results) {
-        setResults(selectedHistoryItem.results);
-      }
+      setResults(selectedHistoryItem.results || null);
       if (selectedHistoryItem.language) {
         setLanguage(selectedHistoryItem.language);
       }
@@ -231,6 +237,16 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
       reader.readAsText(file);
     }
   };
+  
+  const handleUseExample = (example: 'js' | 'go') => {
+    if (example === 'js') {
+      setCode(jsExampleCode);
+      setLanguage('javascript');
+    } else {
+      setCode(goExampleCode);
+      setLanguage('go');
+    }
+  }
 
   const renderSkeletons = () => (
     <div className="space-y-4 p-6 pt-0">
@@ -267,7 +283,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
       </header>
       <main className="flex-1 p-4 sm:p-6">
         <div className={`mx-auto grid gap-6 ${results || isLoading ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
-            <div className={`${results || isLoading ? '' : 'col-span-1 lg:col-span-2'}`}>
+            <div className={`${results || isLoading ? '' : 'col-span-1'}`}>
                 <Card className="flex flex-col">
                     <CardHeader className="flex flex-row items-start justify-between gap-4">
                     <div>
@@ -317,15 +333,19 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                             </Tooltip>
                             </TooltipProvider>
                         </TabsList>
-                        <TabsContent value="paste" className="mt-4 flex-1">
-                        <Textarea
-                            ref={textareaRef}
-                            value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            placeholder="Paste your code here..."
-                            className="min-h-[400px] flex-1 resize-none font-code text-sm"
-                            disabled={isLoading}
-                        />
+                        <TabsContent value="paste" className="mt-4 flex-1 flex flex-col">
+                          <Textarea
+                              ref={textareaRef}
+                              value={code}
+                              onChange={(e) => setCode(e.target.value)}
+                              placeholder="Paste your code here..."
+                              className="min-h-[400px] flex-1 resize-none font-code text-sm"
+                              disabled={isLoading}
+                          />
+                          <div className="flex justify-end gap-2 mt-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleUseExample('js')}>Use JS Example</Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleUseExample('go')}>Use Go Example</Button>
+                          </div>
                         </TabsContent>
                         <TabsContent value="upload" className="mt-4">
                         <div className="flex items-center justify-center w-full">
@@ -372,6 +392,11 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     </Tabs>
                     </CardContent>
                 </Card>
+                {!(results || isLoading) && (
+                   <div className="mt-6 lg:hidden">
+                    <HowItWorks />
+                  </div>
+                )}
             </div>
             <div className="overflow-hidden">
                 {isLoading ? (
@@ -463,7 +488,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     </CardContent>
                 </Card>
                 ) : (
-                    <div className="mt-6 lg:mt-0">
+                    <div className="hidden lg:block">
                         <HowItWorks />
                     </div>
                 )}
@@ -473,3 +498,5 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
     </div>
   );
 }
+
+    
