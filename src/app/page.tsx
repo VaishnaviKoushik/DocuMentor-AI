@@ -5,9 +5,10 @@ import { useState, useCallback } from 'react';
 import AppLayout from '@/components/app-layout';
 import MainPanel from '@/components/main-panel';
 import HistoryPanel from '@/components/history-panel';
+import SettingsPanel from '@/components/settings-panel';
 import { type HistoryItem } from '@/lib/types';
 
-export type View = 'main' | 'history';
+export type View = 'main' | 'history' | 'settings';
 
 export default function Home() {
   const [view, setView] = useState<View>('main');
@@ -31,6 +32,7 @@ export default function Home() {
     <AppLayout view={view} setView={handleSetView}>
       {view === 'main' && <MainPanel selectedHistoryItem={selectedHistoryItem} />}
       {view === 'history' && <HistoryPanel key={historyKey} onSelectHistory={handleSelectHistory} />}
+      {view === 'settings' && <SettingsPanel />}
     </AppLayout>
   );
 }

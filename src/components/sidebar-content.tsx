@@ -53,7 +53,10 @@ export default function AppSidebarContent({
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton href="#" disabled>
+          <SidebarMenuButton
+            onClick={() => setView('settings')}
+            isActive={view === 'settings'}
+          >
             <Settings />
             Settings
           </SidebarMenuButton>
