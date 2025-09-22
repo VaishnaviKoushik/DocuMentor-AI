@@ -487,7 +487,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                          <TabsContent value="summary" className="space-y-4">
                             <h3 className="text-lg font-semibold">Code Summary</h3>
                             {results.summary ? (
-                                <div className="prose prose-sm dark:prose-invert rounded-md border p-4" dangerouslySetInnerHTML={{ __html: results.summary.replace(/\n/g, '<br />') }} />
+                                <div className="prose prose-sm dark:prose-invert max-w-none rounded-md border p-4" dangerouslySetInnerHTML={{ __html: results.summary }} />
                             ) : (
                                 <p className="text-muted-foreground">No summary could be generated for this code.</p>
                             )}

@@ -19,7 +19,7 @@ const GenerateCodebaseSummaryInputSchema = z.object({
 export type GenerateCodebaseSummaryInput = z.infer<typeof GenerateCodebaseSummaryInputSchema>;
 
 const GenerateCodebaseSummaryOutputSchema = z.object({
-  summary: z.string().describe('The generated README-style summary of the code.'),
+  summary: z.string().describe('The generated README-style summary of the code as an HTML string.'),
 });
 export type GenerateCodebaseSummaryOutput = z.infer<typeof GenerateCodebaseSummaryOutputSchema>;
 
@@ -31,7 +31,10 @@ const prompt = ai.definePrompt({
   name: 'generateCodebaseSummaryPrompt',
   input: {schema: GenerateCodebaseSummaryInputSchema},
   output: {schema: GenerateCodebaseSummaryOutputSchema},
-  prompt: `You are an expert documentation writer. Given the following code snippet, generate a README-style summary. The summary should be well-structured, clear, and concise, explaining the code's purpose, functions, and overall structure. Use a developer tone -- clear, professional, concise, and helpful. Use markdown for formatting.
+  prompt: `You are an expert documentation writer. Given the following code snippet, generate a README-style summary formatted as a clean, well-structured HTML document snippet.
+  
+The summary should be clear and concise, explaining the code's purpose, functions, and overall structure. Use a developer tone -- clear, professional, concise, and helpful. 
+Use HTML tags like <h3> for headings, <ul> and <li> for lists, and <code> for code elements. Do not include <html> or <body> tags.
 
 Code Snippet:
 \`\`\`
