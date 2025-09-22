@@ -134,7 +134,7 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   }, [selectedHistoryItem]);
 
   useEffect(() => {
-    if (results) {
+    if (results?.docstrings) {
       setEditedDocstrings(results.docstrings);
     }
   }, [results]);

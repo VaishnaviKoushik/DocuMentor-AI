@@ -7,6 +7,6 @@ export type HistoryItem = {
     id: string;
     code: string;
     language: string;
-    results: Omit<AnalysisResults, 'summary'>;
+    results: AnalysisResults;
     createdAt: Timestamp; // Ensure createdAt is always a Timestamp
 };

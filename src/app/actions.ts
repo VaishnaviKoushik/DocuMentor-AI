@@ -9,6 +9,7 @@ export type AnalysisResults = {
   docstrings: string;
   improvements: string[];
   undocumented: string[];
+  summary?: string; 
 };
 
 export async function analyzeCode(
