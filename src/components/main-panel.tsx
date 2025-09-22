@@ -60,7 +60,7 @@ import { Skeleton } from './ui/skeleton';
 
 
 const exampleCode = `def calculate_fibonacci(n):
-    /**
+    """
      * Calculates the nth Fibonacci number.
      *
      * This function computes the nth number in the Fibonacci sequence
@@ -125,7 +125,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
   useEffect(() => {
     if (selectedHistoryItem) {
       setCode(selectedHistoryItem.code);
-      setResults(selectedHistoryItem.results);
+      if (selectedHistoryItem.results) {
+        setResults(selectedHistoryItem.results);
+      }
       if (selectedHistoryItem.language) {
         setLanguage(selectedHistoryItem.language);
       }
@@ -264,111 +266,113 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
         </Button>
       </header>
       <main className="flex-1 p-4 sm:p-6">
-        <div className="mx-auto grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <Card className="flex flex-col">
-                <CardHeader className="flex flex-row items-start justify-between gap-4">
-                <div>
-                    <CardTitle>Code Input</CardTitle>
-                    <CardDescription>
-                    Paste code, upload a file, or connect to a GitHub repo.
-                    </CardDescription>
-                </div>
-                <div className="w-36">
-                    <Label htmlFor="language-select" className="sr-only">Language</Label>
-                    <Select value={language} onValueChange={setLanguage} disabled={isLoading}>
-                    <SelectTrigger id="language-select">
-                        <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="python">Python</SelectItem>
-                        <SelectItem value="javascript">JavaScript</SelectItem>
-                        <SelectItem value="typescript">TypeScript</SelectItem>
-                        <SelectItem value="java">Java</SelectItem>
-                        <SelectItem value="cplusplus">C++</SelectItem>
-                        <SelectItem value="go">Go</SelectItem>
-                    </SelectContent>
-                    </Select>
-                </div>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col pt-0">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <TabsTrigger value="paste" disabled={isLoading}><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>Paste Code</TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <TabsTrigger value="upload" disabled={isLoading}><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>Upload File</TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                            <TabsTrigger value="github" disabled={true}><Github /><span className="sr-only">GitHub</span></TabsTrigger>
-                            </TooltipTrigger>
-                            <TooltipContent>GitHub (coming soon)</TooltipContent>
-                        </Tooltip>
-                        </TooltipProvider>
-                    </TabsList>
-                    <TabsContent value="paste" className="mt-4 flex-1">
-                    <Textarea
-                        ref={textareaRef}
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="Paste your code here..."
-                        className="min-h-[400px] flex-1 resize-none font-code text-sm"
-                        disabled={isLoading}
-                    />
-                    </TabsContent>
-                    <TabsContent value="upload" className="mt-4">
-                    <div className="flex items-center justify-center w-full">
-                        <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg  bg-card ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'}`}>
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                                <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">.py, .js, .ts, .java, .cpp, .go</p>
-                            </div>
-                            <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={isLoading} />
-                        </label>
-                    </div> 
-                    </TabsContent>
-                    <TabsContent value="github" className="mt-4">
-                    <div className="space-y-4">
-                        <Alert>
-                        <Info className="h-4 w-4" />
-                        <AlertTitle>Feature Coming Soon</AlertTitle>
-                        <AlertDescription>
-                            GitHub integration is not yet fully implemented.
-                        </AlertDescription>
-                        </Alert>
-                        <div className="space-y-2">
-                        <Label htmlFor="github-repo">Repository URL</Label>
-                        <Input id="github-repo" placeholder="https://github.com/user/repo" disabled />
-                        </div>
-                        <div className="space-y-2">
-                        <Label htmlFor="github-token">Personal Access Token</Label>
-                        <Input id="github-token" type="password" placeholder="ghp_..." disabled />
-                        <p className="text-xs text-muted-foreground">
-                            Create a{' '}
-                            <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
-                            personal access token
-                            </Link>{' '}
-                            with repo access.
-                        </p>
-                        </div>
-                        <Button disabled className="w-full">
-                        <Github />
-                        Connect to Repository
-                        </Button>
+        <div className={`mx-auto grid gap-6 ${results || isLoading ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+            <div className={`${results || isLoading ? '' : 'col-span-1 lg:col-span-2'}`}>
+                <Card className="flex flex-col">
+                    <CardHeader className="flex flex-row items-start justify-between gap-4">
+                    <div>
+                        <CardTitle>Code Input</CardTitle>
+                        <CardDescription>
+                        Paste code, upload a file, or connect to a GitHub repo.
+                        </CardDescription>
                     </div>
-                    </TabsContent>
-                </Tabs>
-                </CardContent>
-            </Card>
+                    <div className="w-36">
+                        <Label htmlFor="language-select" className="sr-only">Language</Label>
+                        <Select value={language} onValueChange={setLanguage} disabled={isLoading}>
+                        <SelectTrigger id="language-select">
+                            <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="python">Python</SelectItem>
+                            <SelectItem value="javascript">JavaScript</SelectItem>
+                            <SelectItem value="typescript">TypeScript</SelectItem>
+                            <SelectItem value="java">Java</SelectItem>
+                            <SelectItem value="cplusplus">C++</SelectItem>
+                            <SelectItem value="go">Go</SelectItem>
+                        </SelectContent>
+                        </Select>
+                    </div>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col pt-0">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <TabsTrigger value="paste" disabled={isLoading}><Code /><span className="sr-only">Paste Code</span></TabsTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>Paste Code</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <TabsTrigger value="upload" disabled={isLoading}><Upload /><span className="sr-only">Upload Files</span></TabsTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>Upload File</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <TabsTrigger value="github" disabled={true}><Github /><span className="sr-only">GitHub</span></TabsTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>GitHub (coming soon)</TooltipContent>
+                            </Tooltip>
+                            </TooltipProvider>
+                        </TabsList>
+                        <TabsContent value="paste" className="mt-4 flex-1">
+                        <Textarea
+                            ref={textareaRef}
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
+                            placeholder="Paste your code here..."
+                            className="min-h-[400px] flex-1 resize-none font-code text-sm"
+                            disabled={isLoading}
+                        />
+                        </TabsContent>
+                        <TabsContent value="upload" className="mt-4">
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="dropzone-file" className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg  bg-card ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted/50'}`}>
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p className="text-xs text-muted-foreground">.py, .js, .ts, .java, .cpp, .go</p>
+                                </div>
+                                <Input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} disabled={isLoading} />
+                            </label>
+                        </div> 
+                        </TabsContent>
+                        <TabsContent value="github" className="mt-4">
+                        <div className="space-y-4">
+                            <Alert>
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>Feature Coming Soon</AlertTitle>
+                            <AlertDescription>
+                                GitHub integration is not yet fully implemented.
+                            </AlertDescription>
+                            </Alert>
+                            <div className="space-y-2">
+                            <Label htmlFor="github-repo">Repository URL</Label>
+                            <Input id="github-repo" placeholder="https://github.com/user/repo" disabled />
+                            </div>
+                            <div className="space-y-2">
+                            <Label htmlFor="github-token">Personal Access Token</Label>
+                            <Input id="github-token" type="password" placeholder="ghp_..." disabled />
+                            <p className="text-xs text-muted-foreground">
+                                Create a{' '}
+                                <Link href="https://github.com/settings/tokens" target="_blank" className="underline">
+                                personal access token
+                                </Link>{' '}
+                                with repo access.
+                            </p>
+                            </div>
+                            <Button disabled className="w-full">
+                            <Github />
+                            Connect to Repository
+                            </Button>
+                        </div>
+                        </TabsContent>
+                    </Tabs>
+                    </CardContent>
+                </Card>
+            </div>
             <div className="overflow-hidden">
                 {isLoading ? (
                 <Card>
@@ -459,7 +463,9 @@ export default function MainPanel({ selectedHistoryItem }: MainPanelProps) {
                     </CardContent>
                 </Card>
                 ) : (
-                  <HowItWorks />
+                    <div className="mt-6 lg:mt-0">
+                        <HowItWorks />
+                    </div>
                 )}
             </div>
         </div>
